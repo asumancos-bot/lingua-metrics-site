@@ -39,6 +39,37 @@ export default async function handler(req, res) {
       });
     }
 
+    // Answers verisini güvenli şekilde JSON'a çevir
+    let answersJson = null;
+
+    if (answers !== undefined && answers !== null) {
+      if (typeof answers === "string") {
+        try {
+          JSON.parse(answers);
+          answersJson = answers;
+        } catch (e) {
+          answersJson = JSON.stringify({});
+        }
+      } else {
+        answersJson = JSON.stringify(answers);
+      }
+    }
+
+    // Duration değerini INTEGER olarak hazırla
+    let durationValue = null;
+
+    if (duration !== undefined && duration !== null) {
+      if (typeof duration === "number") {
+        durationValue = duration;
+      } else {
+        const parsedDuration = parseInt(duration, 10);
+
+        if (!isNaN(parsedDuration)) {
+          durationValue = parsedDuration;
+        }
+      }
+    }
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS assessment_results (
         id SERIAL PRIMARY KEY,
@@ -75,9 +106,27 @@ export default async function handler(req, res) {
         completed_at
       )
       VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10::jsonb,
+        $11,
+        $12
       )
-      RETURNING id, candidate_name, candidate_type, organization_name, score, level, completed_at;
+      RETURNING
+        id,
+        candidate_name,
+        candidate_type,
+        organization_name,
+        score,
+        level,
+        completed_at;
       `,
       [
         candidateName,
@@ -89,8 +138,8 @@ export default async function handler(req, res) {
         level || null,
         score ?? null,
         totalQuestions ?? null,
-       answers ? JSON.stringify(answers) : null,
-        duration ?? null,
+        answersJson,
+        durationValue,
         completedAt || null,
       ]
     );
@@ -100,6 +149,7 @@ export default async function handler(req, res) {
       message: "Assessment result saved successfully.",
       result: result.rows[0],
     });
+
   } catch (error) {
     console.error("SAVE RESULT ERROR:", error);
 
