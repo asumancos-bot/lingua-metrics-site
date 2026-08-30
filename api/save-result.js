@@ -89,7 +89,7 @@ export default async function handler(req, res) {
         level || null,
         score ?? null,
         totalQuestions ?? null,
-        answers || null,
+       answers ? JSON.stringify(answers) : null,
         duration ?? null,
         completedAt || null,
       ]
