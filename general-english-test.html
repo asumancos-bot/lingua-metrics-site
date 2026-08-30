@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>General English Assessment | Lingua-Metrics</title>
+
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    .test-page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 50px 20px;
+    }
+
+    .test-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .test-header img {
+      max-width: 180px;
+      margin-bottom: 20px;
+    }
+
+    .test-header h1 {
+      color: #082c5c;
+      margin-bottom: 10px;
+    }
+
+    .test-info {
+      background: #f4f9fb;
+      border: 1px solid #d7e5eb;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .candidate-form label {
+      display: block;
+      font-weight: 700;
+      margin-top: 15px;
+      margin-bottom: 6px;
+    }
+
+    .candidate-form input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #ccd8df;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      margin-top: 25px;
+      padding: 15px;
+      border: 0;
+      border-radius: 8px;
+      background: #082c5c;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="test-page">
+
+  <div class="test-header">
+    <img src="assets/logo.png" alt="Lingua-Metrics">
+    <h1>General English Assessment</h1>
+    <p>Lingua-Metrics Online Assessment Platform</p>
+  </div>
+
+  <div class="test-info">
+    <strong>Assessment Instructions</strong>
+    <p>
+      Please complete the assessment independently.
+      Read each question carefully and select the best answer.
+    </p>
+  </div>
+
+  <div class="candidate-form">
+
+    <label>Full Name</label>
+    <input type="text" id="candidateName" required>
+
+    <label>Company</label>
+    <input type="text" id="candidateCompany">
+
+    <label>Email</label>
+    <input type="email" id="candidateEmail" required>
+
+    <button type="button" class="start-btn" id="startTest">
+      Start Assessment
+    </button>
+
+  </div>
+
+</div>
+<div id="testArea" style="display:none;" class="test-page">
+
+  <div class="test-header">
+    <img src="assets/logo.png" alt="Lingua-Metrics">
+    <h1>General English Assessment</h1>
+    <p id="candidateInfo"></p>
+  </div>
+
+  <div class="test-info">
+    <strong>Assessment Started</strong>
+    <p>
+      Your assessment is now active. Please answer all questions carefully.
+    </p>
+  </div>
+<div id="timer" style="text-align:center; font-size:20px; font-weight:700; color:#082c5c; margin:20px 0;">Time Remaining: 60:00</div>
+<div id="questionsContainer"></div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    level: "A1",
+    question: "We _____ English teachers.",
+    options: ["is", "isn’t", "are", "am"],
+    answer: "C"
+  },
+  {
+    level: "A1",
+    question: "This is Marry. She’s _____.",
+    options: ["Japan", "American", "Spain", "Britain"],
+    answer: "B"
+  },
+  {
+    level: "A1",
+    question: "I _____ German. I’m from Turkey.",
+    options: ["am not", "aren’t", "isn’t", "am"],
+    answer: "A"
+  },
+  {
+    level: "A1",
+    question: "_____’s your phone number?",
+    options: ["How", "What", "Where", "Which"],
+    answer: "B"
+  },
+  {
+    level: "A1",
+    question: "This is my book and _____ are Michael’s.",
+    options: ["it", "this", "that", "these"],
+    answer: "D"
+  },
+  {
+    level: "A1",
+    question: "They get up early, but they _____ have breakfast.",
+    options: ["do", "does", "don’t", "doesn’t"],
+    answer: "C"
+  },
+  {
+    level: "A1",
+    question: "_____ he live in Paris?",
+    options: ["Do", "Does", "Is", "–"],
+    answer: "B"
+  },
+  {
+    level: "A1",
+    question: "What time _____ get home?",
+    options: ["is she", "she is", "she do", "does she"],
+    answer: "D"
+  },
+  {
+    level: "A1",
+    question: "I like _____ to music.",
+    options: ["listen", "listens", "listening", "to listening"],
+    answer: "C"
+  },
+  {
+    level: "A1",
+    question: "Linda’s _____ name’s Cindy.",
+    options: ["brother’s", "uncle is", "mother’s", "sister is"],
+   answer: "C"
+  },
+  {
+    level: "A2",
+    question: "The shop is open every day, but it _____ crowded.",
+    options: ["is usually", "often is", "usually is", "isn’t never"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "Have they got _____ friends?",
+    options: ["some", "any", "a", "the"],
+    answer: "B"
+  },
+  {
+    level: "A2",
+    question: "_____ a table and two chairs in the kitchen.",
+    options: ["It’s", "There have", "There’s", "There got"],
+    answer: "C"
+  },
+  {
+    level: "A2",
+    question: "The school is _____ the post office.",
+    options: ["opposite", "next", "near to", "behind to"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "You _____ buy stamps in a butcher’s.",
+    options: ["can", "should", "must", "can’t"],
+    answer: "D"
+  },
+  {
+    level: "A2",
+    question: "How _____ sugar do you put in your tea?",
+    options: ["many", "much", "more", "far"],
+    answer: "B"
+  },
+  {
+    level: "A2",
+    question: "She goes to school _____ car.",
+    options: ["on", "in", "at", "by"],
+    answer: "D"
+  },
+  {
+    level: "A2",
+    question: "_____ you born in 1983?",
+    options: ["is", "did", "were", "was"],
+    answer: "C"
+  },
+  {
+    level: "A2",
+    question: "The school opens on September _____.",
+    options: ["21nd", "21st", "21rd", "21th"],
+    answer: "B"
+  },
+  {
+    level: "A2",
+    question: "She _____ pop music when she was a kid.",
+    options: ["love", "loves", "loving", "loved"],
+    answer: "D"
+  }, 
+ {
+    level: "A2",
+    question: "Pat and Kim play tennis _____ Sundays.",
+    options: ["on", "at", "in", "every"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "Summer is _____ than spring.",
+    options: ["hot", "more hot", "hotter", "the hottest"],
+    answer: "C"
+  },
+  {
+    level: "A2",
+    question: "What _____ studying at the moment?",
+    options: ["is", "is she", "does she", "does"],
+    answer: "B"
+  },
+  {
+    level: "A2",
+    question: "They _____ to work.",
+    options: ["never drive", "drive never", "is never driving", "are never drive"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "Sam _____ his lunch two hours ago.",
+    options: ["eats", "is eating", "eat", "ate"],
+    answer: "D"
+  },
+  {
+    level: "A2",
+    question: "She _____ unhappy when she was married.",
+    options: ["was", "were", "didn’t", "doesn’t"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "You _____ smoke in closed areas.",
+    options: ["must", "don’t have to", "mustn’t", "can"],
+    answer: "C"
+  },
+  {
+    level: "A2",
+    question: "Let’s _____ out tonight.",
+    options: ["go", "go to", "going", "to go"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "Don’t drink too much coke or you _____ have a stomachache.",
+    options: ["will", "should", "won’t", "can’t"],
+    answer: "A"
+  },
+  {
+    level: "A2",
+    question: "Please turn on the air-conditioning. It’s _____.",
+    options: ["too hotly", "enough cold", "very cold", "too hot"],
+    answer: "D"
+  },
+{
+    level: "B1",
+    question: "She _____ shopping because she needed new shoes.",
+    options: ["went", "went to", "go", "gone to"],
+    answer: "B"
+  },
+  {
+    level: "B1",
+    question: "They always check their emails when they _____ the office.",
+    options: ["got to", "get to", "are getting", "get"],
+    answer: "C"
+  },
+  {
+    level: "B1",
+    question: "We don’t have much free time, so we _____ meet friends.",
+    options: ["once in a while", "usually", "hardly ever", "once a week"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "What _____ now?",
+    options: ["she watches", "is she watching", "does she watch", "is she watch"],
+    answer: "D"
+  },
+  {
+    level: "B1",
+    question: "They _____ have a holiday in June.",
+    options: ["going to", "go to", "are going to", "are going"],
+    answer: "B"
+  },
+  {
+    level: "B1",
+    question: "I _____ to Los Angles tonight.",
+    options: ["am flying", "fly", "going to fly", "have flew"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "Have you ever _____ a cake?",
+    options: ["make", "do", "done", "made"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "He _____ when the bell rang.",
+    options: ["was slept", "was sleeping", "is sleeping", "has slept"],
+    answer: "D"
+  },
+  {
+    level: "B1",
+    question: "The last time I saw her _____ last week.",
+    options: ["was", "were", "is", "did"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "You _____ fasten your seatbelt. It is very dangerous to drive without it.",
+    options: ["must", "don’t have to", "shouldn’t", "might"],
+    answer: "B"
+  },
+ {
+    level: "B1",
+    question: "You don’t look well. Have you _____ a cold?",
+    options: ["felt", "catch", "feet", "caught"],
+    answer: "D"
+  },
+  {
+    level: "B1",
+    question: "Women waste _____ money on clothes.",
+    options: ["too much", "so many", "not enough", "a lot"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "He chose the book _____ had the best cover.",
+    options: ["who", "which", "what", "whose"],
+    answer: "B"
+  },
+  {
+    level: "B1",
+    question: "She began working in a company in _____ United States of America.",
+    options: ["–", "the", "a", "an"],
+    answer: "B"
+  },
+  {
+    level: "B1",
+    question: "This is _____ interesting game I’ve ever played.",
+    options: ["most", "more", "the most", "a most"],
+    answer: "C"
+  },
+  {
+    level: "B1",
+    question: "This house _____ by my uncle in 2010.",
+    options: ["was built", "built", "was build", "build"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "The company hasn’t replied back _____.",
+    options: ["already", "just", "never", "yet"],
+    answer: "D"
+  },
+  {
+    level: "B1",
+    question: "If she gets that job, she _____ a party.",
+    options: ["will organize", "organizes", "would organize", "will she"],
+    answer: "A"
+  },
+  {
+    level: "B1",
+    question: "They _____ us the boy was a great talent.",
+    options: ["told to", "said", "told", "tell"],
+    answer: "C"
+  },
+  {
+    level: "B1",
+    question: "What would you do if you _____ someone stealing?",
+    options: ["see", "saw", "would see", "will see"],
+    answer: "B"
+  },
+ {
+    level: "B2",
+    question: "He _____ a wonderful speech at the conference.",
+    options: ["made", "is made", "did", "did do"],
+    answer: "A"
+  },
+  {
+    level: "B2",
+    question: "Paula _____ all morning yesterday.",
+    options: ["was cleaning", "is cleaned", "isn’t cleaning", "doesn’t clean"],
+    answer: "A"
+  },
+  {
+    level: "B2",
+    question: "_____ to Italy?",
+    options: ["Does she ever be", "Has she ever been", "Was she ever go", "Did she ever flown"],
+    answer: "B"
+  },
+  {
+    level: "B2",
+    question: "I _____ a celebrity before I met him.",
+    options: ["would ever meet", "haven’t met", "had never met", "never have met"],
+    answer: "C"
+  },
+  {
+    level: "B2",
+    question: "It _____ to rain today. Look at the gray clouds.",
+    options: ["isn’t likely", "is likely", "can", "may well"],
+    answer: "B"
+  },
+  {
+    level: "B2",
+    question: "He _____ an accident. He’s driving too fast.",
+    options: ["was going to have", "will be having", "will have had", "is going to have"],
+    answer: "D"
+  },
+  {
+    level: "B2",
+    question: "My father _____ tell me stories when I was a child.",
+    options: ["use to", "used to", "was used to", "used"],
+    answer: "B"
+  },
+  {
+    level: "B2",
+    question: "That is one of _____ cars in the world.",
+    options: ["the fastest", "faster", "the most fast", "fastest"],
+    answer: "A"
+  },
+  {
+    level: "B2",
+    question: "Tom isn’t _____ Bill.",
+    options: ["as taller than", "the tallest as", "as tall as", "as taller as"],
+    answer: "C"
+  },
+  {
+    level: "B2",
+    question: "She’s tried this shirt on, _____?",
+    options: ["hasn’t she", "is she", "did she", "hadn’t she"],
+    answer: "A"
+  },
+ {
+    level: "B2",
+    question: "They can’t catch the plane _____ they hurry.",
+    options: ["unless", "if", "while", "when"],
+    answer: "A"
+  },
+  {
+    level: "B2",
+    question: "I’d tell him the truth if I _____ you.",
+    options: ["am", "were", "had been", "have been"],
+    answer: "B"
+  },
+  {
+    level: "B2",
+    question: "We _____ to escape from the burning building.",
+    options: ["suppose", "can’t", "couldn’t", "were able"],
+    answer: "D"
+  },
+  {
+    level: "B2",
+    question: "He has found _____ brand new apartment for us.",
+    options: ["an", "the", "a", "–"],
+    answer: "C"
+  },
+  {
+    level: "B2",
+    question: "John is the worker _____ performance is considered the best.",
+    options: ["who", "whose", "that", "who’s"],
+    answer: "B"
+  },
+  {
+    level: "B2",
+    question: "I _____ called you if I had your number.",
+    options: ["would have", "would", "could", "had better"],
+    answer: "A"
+  },
+  {
+    level: "B2",
+    question: "The flowers _____ watered yet.",
+    options: ["were", "haven’t been", "hadn’t been", "are"],
+    answer: "B"
+  },
+  {
+    level: "B2",
+    question: "The old round table _____ by a talented carpenter.",
+    options: ["done", "made", "has being done", "was made"],
+    answer: "D"
+  },
+  {
+    level: "B2",
+    question: "The teacher told me that I _____ my assignments regularly.",
+    options: ["must have done", "would have made", "could make", "had to do"],
+    answer: "D"
+  },
+  {
+    level: "B2",
+    question: "The police asked him if he _____ the bank.",
+    options: ["has robbed", "might rob", "had robbed", "was robbed"],
+    answer: "C"
+  },
+ {
+    level: "C1",
+    question: "Could I ask you how much _____?",
+    options: ["you earn", "do you earn", "did you earn", "you do earn"],
+    answer: "A"
+  },
+  {
+    level: "C1",
+    question: "She _____ for a Japanese company for 5 years before starting this job.",
+    options: ["have had to work", "have worked", "have been working", "had worked"],
+    answer: "D"
+  },
+  {
+    level: "C1",
+    question: "I can’t find my glasses. I _____ them in the drawer.",
+    options: ["was putting", "’d put", "’ve put", "was put"],
+    answer: "B"
+  },
+  {
+    level: "C1",
+    question: "Do you know when _____?",
+    options: ["we are going to be picked up", "are we going to be picked up", "we are going to pick up", "are we going to pick up"],
+    answer: "A"
+  },
+  {
+    level: "C1",
+    question: "It’s quite difficult to get used _____ abroad.",
+    options: ["to live", "living", "live", "to living"],
+    answer: "D"
+  },
+  {
+    level: "C1",
+    question: "She _____ the report for an hour when the power went off.",
+    options: ["was written", "was writing", "had been writing", "have written"],
+    answer: "C"
+  },
+  {
+    level: "C1",
+    question: "I wish I _____ architecture. I regret becoming a nurse.",
+    options: ["have studied", "studied", "study", "had studied"],
+    answer: "D"
+  },
+  {
+    level: "C1",
+    question: "Last year, the group had a hard time in _____ Gobi Desert.",
+    options: ["the", "a", "an", "–"],
+    answer: "A"
+  },
+  {
+    level: "C1",
+    question: "It was an extremely challenging test, but I _____ pass.",
+    options: ["manage", "managed to", "was able", "supposed to"],
+    answer: "B"
+  },
+  {
+    level: "C1",
+    question: "At 9 o’clock tomorrow, Joe _____ on the beach.",
+    options: ["will be sunbathing", "will have sunbathed", "is being sunbathing", "will be sunbathed"],
+    answer: "A"
+  },
+{
+    level: "C1",
+    question: "By the time the class ends, we _____ all the material for the exam.",
+    options: ["are going to discuss", "will be discussing", "will have discussed", "will have been discussing"],
+    answer: "C"
+  },
+  {
+    level: "C1",
+    question: "They found the party tedious, so _____ of them wanted to stay.",
+    options: ["either", "any", "both", "neither"],
+    answer: "D"
+  },
+  {
+    level: "C1",
+    question: "Jimmy wonders why _____ without saying a word.",
+    options: ["has Sue left", "Sue left", "did Sue leave", "had Sue left"],
+    answer: "B"
+  },
+  {
+    level: "C1",
+    question: "The manager would have attended the meeting if he _____ sick.",
+    options: ["hadn’t been", "haven’t been", "were", "wouldn’t have been"],
+    answer: "A"
+  },
+  {
+    level: "C1",
+    question: "You _____ work hard, or you’ll fail.",
+    options: ["would better work", "had better to work", "had better working", "had better work"],
+    answer: "D"
+  },
+  {
+    level: "C1",
+    question: "She stopped ironing and went on _____ the dishes.",
+    options: ["to wash", "to washing", "washing", "wash"],
+    answer: "A"
+  },
+  {
+    level: "C1",
+    question: "They stopped _____ dinner.",
+    options: ["havings", "having had", "to have", "to having"],
+    answer: "C"
+  },
+  {
+    level: "C1",
+    question: "You are so lucky. You _____ because of the huge waves.",
+    options: ["could have drowned", "must have drowned", "would have drowned", "may have been drowned"],
+    answer: "A"
+  },
+  {
+    level: "C1",
+    question: "I’m not interested in books _____ in ancient times.",
+    options: ["which was written", "written", "that wrote", "writing"],
+    answer: "B"
+  },
+  {
+    level: "C1",
+    question: "The ring _____ he gave her last night is fabulous.",
+    options: ["–", "when", "whose", "what"],
+    answer: "A"
+  },
+{
+    level: "C2",
+    question: "I couldn’t get back to you last night as I _____.",
+    options: ["had slept", "had been slept", "was sleeping", "have slept"],
+    answer: "C"
+  },
+  {
+    level: "C2",
+    question: "Jane _____ furious when someone disagrees with her.",
+    options: ["is prone to become", "likely to become", "is prone becoming", "is likely becoming"],
+    answer: "A"
+  },
+  {
+    level: "C2",
+    question: "By the end of this year they _____ to five countries.",
+    options: ["will travel", "will be travelling", "will have been travelling", "will have travelled"],
+    answer: "D"
+  },
+  {
+    level: "C2",
+    question: "When the man showed up, she _____ for two hours.",
+    options: ["have been waiting", "had waited", "waited", "had been waiting"],
+    answer: "D"
+  },
+  {
+    level: "C2",
+    question: "Tom is keen on sports, _____ his sister hates such activities.",
+    options: ["whereas", "nevertheless", "hence", "though"],
+    answer: "A"
+  },
+  {
+    level: "C2",
+    question: "Farmers earn very little money _____ working hard.",
+    options: ["although", "in spite", "even if", "despite"],
+    answer: "B"
+  },
+  {
+    level: "C2",
+    question: "Having said _____, I believe that you are being unfair.",
+    options: ["what", "it", "that", "these"],
+    answer: "B"
+  },
+  {
+    level: "C2",
+    question: "I _____ buy that car, but I couldn’t get a bank loan.",
+    options: ["was going to", "am going to", "was thinking of", "was able to"],
+    answer: "A"
+  },
+  {
+    level: "C2",
+    question: "A donkey is _____ near as strong as a horse.",
+    options: ["somewhere", "nowhere", "miles", "a little"],
+    answer: "B"
+  },
+  {
+    level: "C2",
+    question: "Ted is _____ the cleverest in the family.",
+    options: ["by far", "far", "a lot", "slightly"],
+    answer: "A"
+  }
+];const startButton = document.getElementById("startTest");
+let currentQuestion = 0;
+let userAnswers = [];
+startButton.addEventListener("click", function () {
+
+  const name = document.getElementById("candidateName").value.trim();
+  const email = document.getElementById("candidateEmail").value.trim();
+  const company = document.getElementById("candidateCompany").value.trim();
+
+  if (!name || !email) {
+    alert("Please enter your full name and email address.");
+    return;
+  }
+
+  document.querySelector(".candidate-form").parentElement.style.display = "none";
+
+  document.getElementById("candidateInfo").textContent =
+    name + (company ? " — " + company : "");
+
+  document.getElementById("testArea").style.display = "block";
+const progressButton = document.createElement("button");
+
+progressButton.type = "button";
+progressButton.className = "start-btn";
+progressButton.textContent = "View Progress";
+
+progressButton.addEventListener("click", function () {
+  showProgress();
+});
+
+document.getElementById("testArea").insertBefore(
+  progressButton,
+  document.getElementById("questionsContainer")
+);
+function showProgress() {
+
+  const container = document.getElementById("questionsContainer");
+
+  const answeredCount = userAnswers.filter(function(answer) {
+    return answer !== undefined;
+  }).length;
+
+  const blankCount = questions.length - answeredCount;
+
+  container.innerHTML = "";
+
+  const progressBox = document.createElement("div");
+
+  progressBox.style.background = "#ffffff";
+  progressBox.style.padding = "25px";
+  progressBox.style.borderRadius = "16px";
+  progressBox.style.border = "1px solid #d7e5eb";
+
+  const title = document.createElement("h2");
+  title.textContent = "Assessment Progress";
+  title.style.color = "#082c5c";
+
+  progressBox.appendChild(title);
+
+  const summary = document.createElement("p");
+  summary.innerHTML =
+    "🟢 <strong>Answered:</strong> " + answeredCount +
+    " &nbsp;&nbsp;&nbsp; " +
+    "⚪ <strong>Blank:</strong> " + blankCount;
+
+  progressBox.appendChild(summary);
+
+  const grid = document.createElement("div");
+
+  grid.style.display = "grid";
+  grid.style.gridTemplateColumns = "repeat(10, 1fr)";
+  grid.style.gap = "8px";
+  grid.style.marginTop = "20px";
+
+  questions.forEach(function(question, index) {
+
+    const questionButton = document.createElement("button");
+
+    questionButton.type = "button";
+    questionButton.textContent = index + 1;
+
+    questionButton.style.padding = "10px";
+    questionButton.style.borderRadius = "8px";
+    questionButton.style.border = "1px solid #d7e5eb";
+    questionButton.style.cursor = "pointer";
+    questionButton.style.fontWeight = "700";
+
+    if (userAnswers[index] !== undefined) {
+      questionButton.style.background = "#dff3e4";
+      questionButton.style.color = "#247a3d";
+    } else {
+      questionButton.style.background = "#eeeeee";
+      questionButton.style.color = "#666666";
+    }
+
+    questionButton.addEventListener("click", function() {
+
+      currentQuestion = index;
+
+      showQuestion();
+
+    });
+
+    grid.appendChild(questionButton);
+  });
+
+  progressBox.appendChild(grid);
+
+  container.appendChild(progressBox);
+}
+let timeLeft = 60 * 60;
+
+const timerInterval = setInterval(function () {
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  document.getElementById("timer").textContent =
+    "Time Remaining: " +
+    minutes + ":" +
+    String(seconds).padStart(2, "0");
+
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    alert("Time is up. Your assessment has ended.");
+    return;
+  }
+
+  timeLeft--;
+
+}, 1000);
+showQuestion();
+function showQuestion() {  
+const container = document.getElementById("questionsContainer");
+
+  container.innerHTML = "";
+
+const item = questions[currentQuestion];
+
+ const questionBox = document.createElement("div");
+
+questionBox.style.background = "#ffffff";
+questionBox.style.border = "1px solid #d7e5eb";
+questionBox.style.borderRadius = "12px";
+questionBox.style.padding = "25px";
+questionBox.style.marginBottom = "20px";
+
+const title = document.createElement("h3");
+title.textContent =
+  "Question " + (currentQuestion + 1) + " / 100";
+title.style.color = "#082c5c";
+
+questionBox.appendChild(title);
+
+const questionText = document.createElement("p");
+questionText.textContent = item.question;
+questionText.style.fontWeight = "700";
+questionText.style.fontSize = "17px";
+
+questionBox.appendChild(questionText);
+
+item.options.forEach(function (option, optionIndex) {
+
+  const label = document.createElement("label");
+
+  label.style.display = "block";
+  label.style.padding = "10px";
+  label.style.cursor = "pointer";
+
+  const radio = document.createElement("input");
+
+  radio.type = "radio";
+  radio.name = "currentQuestion";
+  radio.value = String.fromCharCode(65 + optionIndex);
+radio.addEventListener("change", function() {
+  userAnswers[currentQuestion] = radio.value;
+});
+if (userAnswers[currentQuestion] === radio.value) {
+  radio.checked = true;
+}
+  label.appendChild(radio);
+
+  label.appendChild(
+    document.createTextNode(
+      " " + String.fromCharCode(65 + optionIndex) + ") " + option
+    )
+  );
+
+  questionBox.appendChild(label);
+});
+const previousButton = document.createElement("button");
+
+previousButton.type = "button";
+previousButton.className = "start-btn";
+previousButton.textContent = "← Previous Question";
+
+previousButton.disabled = currentQuestion === 0;
+
+previousButton.addEventListener("click", function () {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    showQuestion();
+
+    
+  }
+});
+const finishButton = document.createElement("button");
+
+finishButton.type = "button";
+finishButton.className = "start-btn";
+finishButton.textContent = "✓ Finish Assessment";
+
+finishButton.addEventListener("click", function () {
+
+  const selected =
+    document.querySelector('input[name="currentQuestion"]:checked');
+
+  if (selected) {
+    userAnswers[currentQuestion] = selected.value;
+  }
+
+  const answeredCount = userAnswers.filter(function(answer) {
+    return answer !== undefined;
+  }).length;
+
+  const totalAttempted = currentQuestion + 1;
+
+  const score = userAnswers.reduce(function(total, answer, index) {
+    return total + (answer === questions[index].answer ? 1 : 0);
+  }, 0);
+
+  const confirmed = confirm(
+    "Are you sure you want to finish the assessment?\n\n" +
+    "Answered: " + answeredCount + "\n" +
+    "Questions reached: " + totalAttempted
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  fetch("/api/save-result", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      candidateName: name,
+      email: email,
+      organizationName: company,
+      testName: "General English Assessment",
+      candidateType: company ? "corporate" : "individual",
+      level: "General English",
+      score: score,
+      totalQuestions: totalAttempted,
+      answeredQuestions: answeredCount,
+      answers: userAnswers,
+      duration: "60 minutes",
+      completedAt: new Date().toISOString()
+    })
+  })
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(data) {
+    console.log("Result saved:", data);
+
+    clearInterval(timerInterval);
+
+    document.getElementById("timer").style.display = "none";
+    document.getElementById("testArea").querySelector(".test-info").style.display = "none";
+
+    progressButton.style.display = "none";
+
+    document.getElementById("questionsContainer").innerHTML = `
+      <div style="
+        background:#ffffff;
+        border:1px solid #d7e5eb;
+        border-radius:16px;
+        padding:40px;
+        text-align:center;
+      ">
+        <h2 style="color:#082c5c;">
+          Assessment Completed
+        </h2>
+
+        <p style="font-size:18px; margin-top:20px;">
+          Thank you for completing the assessment.
+        </p>
+
+        <p style="margin-top:10px;">
+          Your assessment has been successfully submitted.
+        </p>
+
+        <p style="margin-top:20px; font-weight:700;">
+          Score: ${score} / ${totalAttempted}
+        </p>
+      </div>
+    `;
+  })
+  .catch(function(error) {
+    console.error("Result save error:", error);
+    alert("There was an error submitting the assessment.");
+  });
+
+});
+const nextButton = document.createElement("button");
+
+nextButton.type = "button";
+nextButton.className = "start-btn";
+nextButton.textContent = "Next Question →";
+
+nextButton.addEventListener("click", function () {
+
+  const selected =
+    document.querySelector('input[name="currentQuestion"]:checked');
+
+  if (selected) {
+    userAnswers[currentQuestion] = selected.value;
+  }
+
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    showQuestion();
+  }
+
+});
+
+
+/* FINISH ASSESSMENT BUTTON */
+
+const finishButton = document.createElement("button");
+
+finishButton.type = "button";
+finishButton.className = "start-btn";
+finishButton.textContent = "✓ Finish Assessment";
+
+finishButton.addEventListener("click", function () {
+
+  const selected =
+    document.querySelector('input[name="currentQuestion"]:checked');
+
+  if (selected) {
+    userAnswers[currentQuestion] = selected.value;
+  }
+
+  const score = userAnswers.reduce(function(total, answer, index) {
+    return total + (answer === questions[index].answer ? 1 : 0);
+  }, 0);
+
+  const totalAttempted = userAnswers.filter(function(answer) {
+    return answer !== undefined;
+  }).length;
+
+  if (!confirm(
+    "Are you sure you want to finish the assessment?\n\n" +
+    "Answered questions: " + totalAttempted
+  )) {
+    return;
+  }
+
+  fetch("/api/save-result", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      candidateName: name,
+      email: email,
+      organizationName: company,
+      testName: "General English Assessment",
+      candidateType: company ? "corporate" : "individual",
+      level: "General English",
+      score: score,
+      totalQuestions: questions.length,
+      answers: userAnswers,
+      duration: "60 minutes",
+      completedAt: new Date().toISOString()
+    })
+  })
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(data) {
+
+    console.log("Result saved:", data);
+
+    document.getElementById("timer").style.display = "none";
+
+    document.getElementById("testArea")
+      .querySelector(".test-info").style.display = "none";
+
+    clearInterval(timerInterval);
+
+    progressButton.style.display = "none";
+
+    document.getElementById("questionsContainer").innerHTML = `
+      <div style="
+        background:#ffffff;
+        border:1px solid #d7e5eb;
+        border-radius:16px;
+        padding:40px;
+        text-align:center;
+      ">
+
+        <h2 style="color:#082c5c;">
+          Assessment Completed
+        </h2>
+
+        <p style="font-size:18px; margin-top:20px;">
+          Thank you for completing the assessment.
+        </p>
+
+        <p style="margin-top:10px;">
+          Your assessment has been successfully submitted.
+        </p>
+
+        <p style="margin-top:20px; font-weight:700;">
+          Score: ${score} / ${totalAttempted}
+        </p>
+
+      </div>
+    `;
+
+  })
+  .catch(function(error) {
+
+    console.error("Result save error:", error);
+
+    alert("There was an error submitting the assessment.");
+
+  });
+
+});
+const buttonContainer = document.createElement("div");
+
+buttonContainer.style.display = "flex";
+buttonContainer.style.flexDirection = "column";
+buttonContainer.style.gap = "12px";
+buttonContainer.style.marginTop = "20px";
+
+const topButtons = document.createElement("div");
+
+topButtons.style.display = "flex";
+topButtons.style.gap = "12px";
+topButtons.style.width = "100%";
+
+previousButton.style.width = "50%";
+previousButton.style.marginTop = "0";
+
+nextButton.style.width = "50%";
+nextButton.style.marginTop = "0";
+
+topButtons.appendChild(previousButton);
+topButtons.appendChild(nextButton);
+
+finishButton.style.width = "100%";
+finishButton.style.marginTop = "0";
+
+buttonContainer.appendChild(topButtons);
+buttonContainer.appendChild(finishButton);
+
+questionBox.appendChild(buttonContainer);
+
+container.appendChild(questionBox);
+}
+showQuestion();
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+
+
+});
+ 
+</script>
+</body>
+</html>
