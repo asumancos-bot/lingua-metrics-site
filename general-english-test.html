@@ -977,7 +977,27 @@ finishButton.addEventListener("click", function () {
   const score = userAnswers.reduce(function(total, answer, index) {
     return total + (answer === questions[index].answer ? 1 : 0);
   }, 0);
+let estimatedLevel = "A1";
 
+if (score >= 93) {
+  estimatedLevel = "C2";
+} else if (score >= 86) {
+  estimatedLevel = "C1.2";
+} else if (score >= 76) {
+  estimatedLevel = "C1.1";
+} else if (score >= 63) {
+  estimatedLevel = "B2.2";
+} else if (score >= 51) {
+  estimatedLevel = "B2.1";
+} else if (score >= 38) {
+  estimatedLevel = "B1.2";
+} else if (score >= 26) {
+  estimatedLevel = "B1.1";
+} else if (score >= 16) {
+  estimatedLevel = "A2.2";
+} else if (score >= 8) {
+  estimatedLevel = "A2.1";
+}
   const totalAttempted = userAnswers.filter(function(answer) {
     return answer !== undefined;
   }).length;
@@ -1000,7 +1020,7 @@ finishButton.addEventListener("click", function () {
       organizationName: company,
       testName: "General English Assessment",
       candidateType: company ? "corporate" : "individual",
-      level: "General English",
+    level: estimatedLevel,
       score: score,
       totalQuestions: questions.length,
       answers: userAnswers,
