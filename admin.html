@@ -3,9 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Lingua-Metrics Admin</title>
 
 <style>
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -14,63 +20,45 @@ body {
 }
 
 .container {
-    max-width: 1200px;
-    margin: 50px auto;
-    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 35px 25px 60px;
 }
 
-.header {
-    text-align: center;
-    margin-bottom: 35px;
-}
-
-.logo {
-    width: 150px;
-    margin-bottom: 20px;
-}
-
-h1 {
-    margin: 5px 0;
-    font-size: 32px;
-}
-
-.subtitle {
-    color: #555;
-    font-size: 16px;
-}
+/* LOGIN */
 
 .login-box {
     max-width: 400px;
-    margin: 80px auto;
+    margin: 100px auto;
     background: white;
-    padding: 35px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
 }
 
 .login-box h2 {
     text-align: center;
-    margin-bottom: 25px;
+    margin: 0 0 30px;
 }
 
-input {
+input,
+select {
     width: 100%;
-    box-sizing: border-box;
-    padding: 13px;
+    padding: 13px 14px;
     margin-bottom: 15px;
     border: 1px solid #ccd6e0;
     border-radius: 7px;
     font-size: 15px;
+    background: white;
 }
 
 button {
-    width: 100%;
-    padding: 13px;
     border: none;
     border-radius: 7px;
     background: #082c5c;
     color: white;
-    font-size: 16px;
+    padding: 12px 18px;
+    font-size: 15px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -85,54 +73,279 @@ button:hover {
     margin-top: 15px;
 }
 
+/* ADMIN */
+
 #adminPanel {
     display: none;
 }
+
+.header {
+    background: white;
+    border-radius: 14px;
+    padding: 28px 30px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    margin-bottom: 25px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.logo {
+    width: 95px;
+    max-height: 70px;
+    object-fit: contain;
+}
+
+h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.subtitle {
+    margin-top: 7px;
+    color: #66727e;
+    font-size: 14px;
+}
+
+.logout {
+    background: #ffffff;
+    color: #082c5c;
+    border: 1px solid #ccd6e0;
+}
+
+/* STAT CARDS */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    padding: 23px;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #6b7785;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+/* FILTERS */
+
+.filters {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.filters input,
+.filters select {
+    margin: 0;
+}
+
+/* TABLE */
 
 .table-wrapper {
     overflow-x: auto;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px;
+    min-width: 1050px;
 }
 
-th, td {
-    padding: 14px;
-    border-bottom: 1px solid #e5e9ee;
+th,
+td {
+    padding: 15px 14px;
+    border-bottom: 1px solid #e7ebef;
     text-align: left;
 }
 
 th {
     background: #082c5c;
     color: white;
+    font-size: 13px;
+}
+
+td {
+    font-size: 14px;
 }
 
 tr:hover {
-    background: #f7f9fb;
+    background: #f8fafc;
 }
 
-.logout {
-    width: auto;
-    padding: 10px 18px;
-    float: right;
-    margin-bottom: 20px;
+.level {
+    font-weight: bold;
+}
+
+.view-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+/* MODAL */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.modal-content {
+    max-width: 800px;
+    margin: 40px auto;
+    background: white;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #e5e9ee;
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.close-btn {
+    background: transparent;
+    color: #082c5c;
+    font-size: 25px;
+    padding: 0 8px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.detail-card {
+    background: #f6f8fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.detail-label {
+    font-size: 12px;
+    color: #697684;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.answers-box {
+    margin-top: 25px;
+}
+
+.answers-box h3 {
+    margin-bottom: 12px;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #f5f7f9;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    overflow-x: auto;
 }
 
 .empty {
     text-align: center;
-    padding: 30px;
-    color: #666;
+    padding: 35px;
+    color: #6b7280;
 }
+
+/* MOBILE */
+
+@media (max-width: 800px) {
+
+    .container {
+        padding: 20px 15px 40px;
+    }
+
+    .header-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        margin: 10px auto;
+        padding: 20px;
+    }
+}
+
 </style>
 </head>
 
 <body>
+
+
+<!-- LOGIN -->
 
 <div id="loginPanel" class="login-box">
 
@@ -159,48 +372,256 @@ tr:hover {
 </div>
 
 
+<!-- ADMIN PANEL -->
+
 <div id="adminPanel">
 
-    <div class="container">
+<div class="container">
 
-        <div class="header">
-            <img src="assets/logo.png" class="logo" alt="Lingua-Metrics">
 
-            <h1>Assessment Results</h1>
+    <!-- HEADER -->
 
-            <div class="subtitle">
-                Lingua-Metrics Online Assessment Platform
+    <div class="header">
+
+        <div class="header-top">
+
+            <div class="brand">
+
+                <img
+                    src="assets/logo.png"
+                    class="logo"
+                    alt="Lingua-Metrics"
+                >
+
+                <div>
+
+                    <h1>Assessment Dashboard</h1>
+
+                    <div class="subtitle">
+                        Lingua-Metrics Online Assessment Platform
+                    </div>
+
+                </div>
+
             </div>
-        </div>
 
-        <button class="logout" onclick="logout()">Log Out</button>
-
-        <div style="clear:both;"></div>
-
-        <div class="table-wrapper">
-
-            <table>
-
-                <thead>
-                    <tr>
-                        <th>Candidate</th>
-                        <th>Email</th>
-                        <th>Organization</th>
-                        <th>Test</th>
-                        <th>Level</th>
-                        <th>Score</th>
-                        <th>Questions</th>
-                        <th>Duration</th>
-                        <th>Completed</th>
-                    </tr>
-                </thead>
-
-                <tbody id="resultsBody">
-                </tbody>
-
-            </table>
+            <button
+                class="logout"
+                onclick="logout()"
+            >
+                Log Out
+            </button>
 
         </div>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                TOTAL ASSESSMENTS
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalAssessments"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                AVERAGE SCORE
+            </div>
+
+            <div
+                class="stat-value"
+                id="averageScore"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                RESULTS SHOWN
+            </div>
+
+            <div
+                class="stat-value"
+                id="shownResults"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search candidate, email or organization..."
+            oninput="filterResults()"
+        >
+
+        <select
+            id="levelFilter"
+            onchange="filterResults()"
+        >
+
+            <option value="">
+                All Levels
+            </option>
+
+            <option value="A1">A1</option>
+            <option value="A2.1">A2.1</option>
+            <option value="A2.2">A2.2</option>
+            <option value="B1.1">B1.1</option>
+            <option value="B1.2">B1.2</option>
+            <option value="B2.1">B2.1</option>
+            <option value="B2.2">B2.2</option>
+            <option value="C1.1">C1.1</option>
+            <option value="C1.2">C1.2</option>
+            <option value="C2">C2</option>
+
+        </select>
+
+
+        <select
+            id="organizationFilter"
+            onchange="filterResults()"
+        >
+
+            <option value="">
+                All Organizations
+            </option>
+
+        </select>
+
+
+        <button onclick="clearFilters()">
+            Clear
+        </button>
+
+    </div>
+
+
+    <!-- RESULTS TABLE -->
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Candidate
+                    </th>
+
+                    <th>
+                        Email
+                    </th>
+
+                    <th>
+                        Organization
+                    </th>
+
+                    <th>
+                        Test
+                    </th>
+
+                    <th>
+                        Level
+                    </th>
+
+                    <th>
+                        Score
+                    </th>
+
+                    <th>
+                        Questions
+                    </th>
+
+                    <th>
+                        Duration
+                    </th>
+
+                    <th>
+                        Completed
+                    </th>
+
+                    <th>
+                        Details
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="resultsBody"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- DETAIL MODAL -->
+
+<div
+    id="detailModal"
+    class="modal"
+    onclick="closeModal(event)"
+>
+
+    <div
+        class="modal-content"
+        onclick="event.stopPropagation()"
+    >
+
+        <div class="modal-header">
+
+            <h2>
+                Assessment Details
+            </h2>
+
+            <button
+                class="close-btn"
+                onclick="closeDetails()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="detailContent"
+        ></div>
 
     </div>
 
@@ -210,6 +631,12 @@ tr:hover {
 <script>
 
 let authHeader = "";
+
+let allResults = [];
+
+
+
+/* LOGIN */
 
 function login() {
 
@@ -225,25 +652,38 @@ function login() {
             "Please enter your username and password.";
 
         return;
+
     }
+
 
     authHeader =
         "Basic " + btoa(username + ":" + password);
 
     loadResults();
+
 }
 
+
+
+/* LOAD RESULTS */
 
 async function loadResults() {
 
     try {
 
-        const response = await fetch("/api/results", {
-            method: "GET",
-            headers: {
-                "Authorization": authHeader
-            }
-        });
+        const response =
+            await fetch("/api/results", {
+
+                method: "GET",
+
+                headers: {
+
+                    "Authorization": authHeader
+
+                }
+
+            });
+
 
         if (!response.ok) {
 
@@ -251,48 +691,35 @@ async function loadResults() {
 
         }
 
-        const data = await response.json();
 
-        document.getElementById("loginPanel").style.display =
-            "none";
+        const data =
+            await response.json();
 
-        document.getElementById("adminPanel").style.display =
-            "block";
 
-        const body =
-            document.getElementById("resultsBody");
+        allResults =
+            Array.isArray(data.results)
+                ? data.results
+                : [];
 
-        body.innerHTML = "";
 
-        if (!data.results || data.results.length === 0) {
+        document.getElementById("loginPanel")
+            .style.display = "none";
 
-            body.innerHTML =
-                '<tr><td colspan="9" class="empty">No assessment results found.</td></tr>';
 
-            return;
-        }
+        document.getElementById("adminPanel")
+            .style.display = "block";
 
-        data.results.forEach(result => {
 
-            const row = document.createElement("tr");
+        populateOrganizations();
 
-            row.innerHTML = `
-                <td>${escapeHTML(result.candidate_name || "")}</td>
-                <td>${escapeHTML(result.email || "")}</td>
-                <td>${escapeHTML(result.organization_name || "")}</td>
-                <td>${escapeHTML(result.test_name || "")}</td>
-                <td><strong>${escapeHTML(result.level || "")}</strong></td>
-                <td>${result.score ?? ""}</td>
-                <td>${result.total_questions ?? ""}</td>
-                <td>${escapeHTML(result.duration || "")}</td>
-                <td>${formatDate(result.completed_at)}</td>
-            `;
+        updateStatistics(allResults);
 
-            body.appendChild(row);
+        renderResults(allResults);
 
-        });
+    }
 
-    } catch (error) {
+
+    catch (error) {
 
         authHeader = "";
 
@@ -300,47 +727,594 @@ async function loadResults() {
             "Invalid username or password.";
 
     }
+
 }
 
+
+
+/* ORGANIZATION FILTER */
+
+function populateOrganizations() {
+
+    const select =
+        document.getElementById("organizationFilter");
+
+    const organizations =
+        [...new Set(
+
+            allResults
+                .map(result =>
+                    result.organization_name
+                )
+                .filter(Boolean)
+
+        )].sort();
+
+
+    select.innerHTML =
+        '<option value="">All Organizations</option>';
+
+
+    organizations.forEach(org => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = org;
+
+        option.textContent = org;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+
+
+/* STATISTICS */
+
+function updateStatistics(results) {
+
+    document.getElementById("totalAssessments")
+        .textContent = allResults.length;
+
+
+    const scores =
+        results
+            .map(result => Number(result.score))
+            .filter(score => !isNaN(score));
+
+
+    const average =
+        scores.length
+            ? (
+                scores.reduce(
+                    (sum, score) => sum + score,
+                    0
+                ) / scores.length
+              ).toFixed(1)
+            : "0";
+
+
+    document.getElementById("averageScore")
+        .textContent = average;
+
+
+    document.getElementById("shownResults")
+        .textContent = results.length;
+
+}
+
+
+
+/* FILTER */
+
+function filterResults() {
+
+    const search =
+        document.getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const level =
+        document.getElementById("levelFilter")
+            .value;
+
+
+    const organization =
+        document.getElementById("organizationFilter")
+            .value;
+
+
+    const filtered =
+        allResults.filter(result => {
+
+            const candidate =
+                String(
+                    result.candidate_name || ""
+                ).toLowerCase();
+
+
+            const email =
+                String(
+                    result.email || ""
+                ).toLowerCase();
+
+
+            const org =
+                String(
+                    result.organization_name || ""
+                ).toLowerCase();
+
+
+            const matchesSearch =
+                !search ||
+                candidate.includes(search) ||
+                email.includes(search) ||
+                org.includes(search);
+
+
+            const matchesLevel =
+                !level ||
+                result.level === level;
+
+
+            const matchesOrganization =
+                !organization ||
+                result.organization_name === organization;
+
+
+            return (
+                matchesSearch &&
+                matchesLevel &&
+                matchesOrganization
+            );
+
+        });
+
+
+    updateStatistics(filtered);
+
+    renderResults(filtered);
+
+}
+
+
+
+/* CLEAR FILTERS */
+
+function clearFilters() {
+
+    document.getElementById("searchInput")
+        .value = "";
+
+    document.getElementById("levelFilter")
+        .value = "";
+
+    document.getElementById("organizationFilter")
+        .value = "";
+
+
+    updateStatistics(allResults);
+
+    renderResults(allResults);
+
+}
+
+
+
+/* RENDER RESULTS */
+
+function renderResults(results) {
+
+    const body =
+        document.getElementById("resultsBody");
+
+
+    body.innerHTML = "";
+
+
+    if (!results.length) {
+
+        body.innerHTML =
+            '<tr>' +
+            '<td colspan="10" class="empty">' +
+            'No assessment results found.' +
+            '</td>' +
+            '</tr>';
+
+        return;
+
+    }
+
+
+    results.forEach((result, index) => {
+
+        const row =
+            document.createElement("tr");
+
+
+        const originalIndex =
+            allResults.indexOf(result);
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHTML(
+                    result.candidate_name || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    result.email || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    result.organization_name || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    result.test_name || ""
+                )}
+            </td>
+
+            <td class="level">
+                ${escapeHTML(
+                    result.level || ""
+                )}
+            </td>
+
+            <td>
+                ${result.score ?? ""}
+            </td>
+
+            <td>
+                ${result.total_questions ?? ""}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    result.duration || ""
+                )}
+            </td>
+
+            <td>
+                ${formatDate(
+                    result.completed_at
+                )}
+            </td>
+
+            <td>
+
+                <button
+                    class="view-btn"
+                    onclick="showDetails(${originalIndex})"
+                >
+                    View
+                </button>
+
+            </td>
+
+        `;
+
+
+        body.appendChild(row);
+
+    });
+
+}
+
+
+
+/* SHOW DETAILS */
+
+function showDetails(index) {
+
+    const result =
+        allResults[index];
+
+
+    if (!result) return;
+
+
+    const answers =
+        result.answers;
+
+
+    let answersHTML = "";
+
+
+    if (answers) {
+
+        let formattedAnswers;
+
+
+        try {
+
+            formattedAnswers =
+                typeof answers === "string"
+                    ? JSON.stringify(
+                        JSON.parse(answers),
+                        null,
+                        2
+                      )
+                    : JSON.stringify(
+                        answers,
+                        null,
+                        2
+                      );
+
+        }
+
+        catch {
+
+            formattedAnswers =
+                String(answers);
+
+        }
+
+
+        answersHTML = `
+
+            <div class="answers-box">
+
+                <h3>
+                    Answer Data
+                </h3>
+
+                <pre>
+${escapeHTML(formattedAnswers)}
+                </pre>
+
+            </div>
+
+        `;
+
+    }
+
+
+    document.getElementById("detailContent")
+        .innerHTML = `
+
+        <div class="detail-grid">
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Candidate
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        result.candidate_name || ""
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Email
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        result.email || ""
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Organization
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        result.organization_name || ""
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Test
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        result.test_name || ""
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Score
+                </div>
+
+                <div class="detail-value">
+                    ${result.score ?? ""}
+                    /
+                    ${result.total_questions ?? ""}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Estimated Level
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        result.level || ""
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Duration
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        result.duration || ""
+                    )}
+                </div>
+
+            </div>
+
+
+            <div class="detail-card">
+
+                <div class="detail-label">
+                    Completed
+                </div>
+
+                <div class="detail-value">
+                    ${formatDate(
+                        result.completed_at
+                    )}
+                </div>
+
+            </div>
+
+        </div>
+
+        ${answersHTML}
+
+    `;
+
+
+    document.getElementById("detailModal")
+        .style.display = "block";
+
+}
+
+
+
+/* CLOSE MODAL */
+
+function closeDetails() {
+
+    document.getElementById("detailModal")
+        .style.display = "none";
+
+}
+
+
+function closeModal(event) {
+
+    if (
+        event.target ===
+        document.getElementById("detailModal")
+    ) {
+
+        closeDetails();
+
+    }
+
+}
+
+
+
+/* LOGOUT */
 
 function logout() {
 
     authHeader = "";
 
-    document.getElementById("adminPanel").style.display =
-        "none";
+    allResults = [];
 
-    document.getElementById("loginPanel").style.display =
-        "block";
 
-    document.getElementById("username").value = "";
+    document.getElementById("adminPanel")
+        .style.display = "none";
 
-    document.getElementById("password").value = "";
 
-    document.getElementById("error").textContent = "";
+    document.getElementById("loginPanel")
+        .style.display = "block";
+
+
+    document.getElementById("username")
+        .value = "";
+
+    document.getElementById("password")
+        .value = "";
+
+    document.getElementById("error")
+        .textContent = "";
 
 }
 
 
+
+/* SECURITY */
+
 function escapeHTML(value) {
 
     return String(value)
+
         .replace(/&/g, "&amp;")
+
         .replace(/</g, "&lt;")
+
         .replace(/>/g, "&gt;")
+
         .replace(/"/g, "&quot;")
+
         .replace(/'/g, "&#039;");
 
 }
 
 
+
+/* DATE */
+
 function formatDate(value) {
 
     if (!value) return "";
 
-    const date = new Date(value);
+    const date =
+        new Date(value);
 
-    if (isNaN(date.getTime())) return value;
+
+    if (
+        isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return escapeHTML(value);
+
+    }
+
 
     return date.toLocaleString();
 
