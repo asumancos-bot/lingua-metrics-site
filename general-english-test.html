@@ -107,7 +107,7 @@
   <p id="accessMessage"></p>
 
 </div>
-  <div class="candidate-form">
+  <div class="candidate-form" id="candidateForm" style="display:none;">
 
     <label>Full Name</label>
     <input type="text" id="candidateName" required>
@@ -780,7 +780,7 @@ verifyAccessBtn.addEventListener("click", async function () {
     }
 
     accessGate.style.display = "none";
-    document.querySelector(".candidate-form:not(#accessGate)").style.display = "block";
+    document.getElementById("candidateForm").style.display = "block";
 
   } catch (error) {
     console.error("ACCESS ERROR:", error);
@@ -801,7 +801,7 @@ startButton.addEventListener("click", function () {
     return;
   }
 
-  document.querySelector(".candidate-form:not(#accessGate)").parentElement.style.display = "none";
+  document.getElementById("candidateForm").style.display = "none";
 
   document.getElementById("candidateInfo").textContent =
     name + (company ? " — " + company : "");
