@@ -87,7 +87,26 @@
       Read each question carefully and select the best answer.
     </p>
   </div>
+<div id="accessGate" class="candidate-form">
 
+  <h2>Assessment Access</h2>
+
+  <p>Please enter the access code sent to you by email.</p>
+
+  <input
+    type="text"
+    id="accessCode"
+    placeholder="Enter your access code"
+    autocomplete="off"
+  >
+
+  <button type="button" id="verifyAccessBtn" class="start-btn">
+    Start Assessment
+  </button>
+
+  <p id="accessMessage"></p>
+
+</div>
   <div class="candidate-form">
 
     <label>Full Name</label>
@@ -727,6 +746,47 @@ const questions = [
     options: ["by far", "far", "a lot", "slightly"],
     answer: "A"
   }
+  const accessGate = document.getElementById("accessGate");
+const accessCodeInput = document.getElementById("accessCode");
+const verifyAccessBtn = document.getElementById("verifyAccessBtn");
+const accessMessage = document.getElementById("accessMessage");
+
+document.querySelector(".candidate-form:not(#accessGate)").style.display = "none";
+
+verifyAccessBtn.addEventListener("click", async function () {
+  const accessCode = accessCodeInput.value.trim();
+
+  if (!accessCode) {
+    accessMessage.textContent = "Please enter your access code.";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/verify-access", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        accessCode: accessCode
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      accessMessage.textContent = data.message;
+      return;
+    }
+
+    accessGate.style.display = "none";
+    document.querySelector(".candidate-form:not(#accessGate)").style.display = "block";
+
+  } catch (error) {
+    console.error("ACCESS ERROR:", error);
+    accessMessage.textContent = "An error occurred. Please try again.";
+  }
+});
 ];const startButton = document.getElementById("startTest");
 let currentQuestion = 0;
 let userAnswers = [];
@@ -741,7 +801,7 @@ startButton.addEventListener("click", function () {
     return;
   }
 
-  document.querySelector(".candidate-form").parentElement.style.display = "none";
+  document.querySelector(".candidate-form:not(#accessGate)").parentElement.style.display = "none";
 
   document.getElementById("candidateInfo").textContent =
     name + (company ? " — " + company : "");
