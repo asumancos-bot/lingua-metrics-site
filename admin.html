@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lingua-Metrics Admin</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7fa;
+    color: #082c5c;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 30px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.logo {
+    width: 150px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 5px 0;
+    font-size: 32px;
+}
+
+.subtitle {
+    color: #555;
+    font-size: 16px;
+}
+
+.login-box {
+    max-width: 400px;
+    margin: 80px auto;
+    background: white;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.login-box h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px;
+    margin-bottom: 15px;
+    border: 1px solid #ccd6e0;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 7px;
+    background: #082c5c;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+#error {
+    color: #b00020;
+    text-align: center;
+    margin-top: 15px;
+}
+
+#adminPanel {
+    display: none;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+th, td {
+    padding: 14px;
+    border-bottom: 1px solid #e5e9ee;
+    text-align: left;
+}
+
+th {
+    background: #082c5c;
+    color: white;
+}
+
+tr:hover {
+    background: #f7f9fb;
+}
+
+.logout {
+    width: auto;
+    padding: 10px 18px;
+    float: right;
+    margin-bottom: 20px;
+}
+
+.empty {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<div id="loginPanel" class="login-box">
+
+    <h2>Lingua-Metrics Admin</h2>
+
+    <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        autocomplete="username"
+    >
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        autocomplete="current-password"
+    >
+
+    <button onclick="login()">Sign In</button>
+
+    <div id="error"></div>
+
+</div>
+
+
+<div id="adminPanel">
+
+    <div class="container">
+
+        <div class="header">
+            <img src="assets/logo.png" class="logo" alt="Lingua-Metrics">
+
+            <h1>Assessment Results</h1>
+
+            <div class="subtitle">
+                Lingua-Metrics Online Assessment Platform
+            </div>
+        </div>
+
+        <button class="logout" onclick="logout()">Log Out</button>
+
+        <div style="clear:both;"></div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Email</th>
+                        <th>Organization</th>
+                        <th>Test</th>
+                        <th>Level</th>
+                        <th>Score</th>
+                        <th>Questions</th>
+                        <th>Duration</th>
+                        <th>Completed</th>
+                    </tr>
+                </thead>
+
+                <tbody id="resultsBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let authHeader = "";
+
+function login() {
+
+    const username =
+        document.getElementById("username").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    if (!username || !password) {
+
+        document.getElementById("error").textContent =
+            "Please enter your username and password.";
+
+        return;
+    }
+
+    authHeader =
+        "Basic " + btoa(username + ":" + password);
+
+    loadResults();
+}
+
+
+async function loadResults() {
+
+    try {
+
+        const response = await fetch("/api/results", {
+            method: "GET",
+            headers: {
+                "Authorization": authHeader
+            }
+        });
+
+        if (!response.ok) {
+
+            throw new Error("Unauthorized");
+
+        }
+
+        const data = await response.json();
+
+        document.getElementById("loginPanel").style.display =
+            "none";
+
+        document.getElementById("adminPanel").style.display =
+            "block";
+
+        const body =
+            document.getElementById("resultsBody");
+
+        body.innerHTML = "";
+
+        if (!data.results || data.results.length === 0) {
+
+            body.innerHTML =
+                '<tr><td colspan="9" class="empty">No assessment results found.</td></tr>';
+
+            return;
+        }
+
+        data.results.forEach(result => {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${escapeHTML(result.candidate_name || "")}</td>
+                <td>${escapeHTML(result.email || "")}</td>
+                <td>${escapeHTML(result.organization_name || "")}</td>
+                <td>${escapeHTML(result.test_name || "")}</td>
+                <td><strong>${escapeHTML(result.level || "")}</strong></td>
+                <td>${result.score ?? ""}</td>
+                <td>${result.total_questions ?? ""}</td>
+                <td>${escapeHTML(result.duration || "")}</td>
+                <td>${formatDate(result.completed_at)}</td>
+            `;
+
+            body.appendChild(row);
+
+        });
+
+    } catch (error) {
+
+        authHeader = "";
+
+        document.getElementById("error").textContent =
+            "Invalid username or password.";
+
+    }
+}
+
+
+function logout() {
+
+    authHeader = "";
+
+    document.getElementById("adminPanel").style.display =
+        "none";
+
+    document.getElementById("loginPanel").style.display =
+        "block";
+
+    document.getElementById("username").value = "";
+
+    document.getElementById("password").value = "";
+
+    document.getElementById("error").textContent = "";
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function formatDate(value) {
+
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (isNaN(date.getTime())) return value;
+
+    return date.toLocaleString();
+
+}
+
+</script>
+
+</body>
+</html>
