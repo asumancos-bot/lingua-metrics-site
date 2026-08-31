@@ -754,6 +754,7 @@ const accessMessage = document.getElementById("accessMessage");
 document.querySelector(".candidate-form:not(#accessGate)").style.display = "none";
 
 verifyAccessBtn.addEventListener("click", async function () {
+  alert("BUTON ÇALIŞIYOR");
   const accessCode = accessCodeInput.value.trim();
 
   if (!accessCode) {
