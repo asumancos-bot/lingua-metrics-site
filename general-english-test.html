@@ -111,7 +111,19 @@
 
     <label>Email</label>
     <input type="email" id="candidateEmail" required>
+<script>
+document.getElementById("candidateName").addEventListener("input", function () {
+    this.value = this.value.toLocaleUpperCase("tr-TR");
+});
 
+document.getElementById("candidateCompany").addEventListener("input", function () {
+    this.value = this.value.toLocaleUpperCase("tr-TR");
+});
+
+document.getElementById("candidateEmail").addEventListener("input", function () {
+    this.value = this.value.toUpperCase();
+});
+</script>
     <button type="button" class="start-btn" id="startTest">
       Start Assessment
     </button>
