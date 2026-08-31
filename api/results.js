@@ -28,6 +28,7 @@ export default async function handler(req, res) {
         organization_name,
         test_name,
         score,
+        level,
         total_questions,
         answers,
         duration,
