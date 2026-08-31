@@ -1029,7 +1029,29 @@ function showDetails(index) {
     const answers =
         result.answers;
 
+const totalQuestions = Number(result.total_questions || 0);
+const candidateAnswers = Array.isArray(result.answers) ? result.answers : [];
+const correctAnswers = Array.isArray(result.correct_answers) ? result.correct_answers : [];
 
+let correctCount = 0;
+let incorrectCount = 0;
+let unansweredCount = 0;
+
+for (let i = 0; i < totalQuestions; i++) {
+    const candidate = candidateAnswers[i];
+
+    if (candidate === null || candidate === undefined || candidate === "") {
+        unansweredCount++;
+    } else if (candidate === correctAnswers[i]) {
+        correctCount++;
+    } else {
+        incorrectCount++;
+    }
+}
+
+const successRate = totalQuestions > 0
+    ? ((correctCount / totalQuestions) * 100).toFixed(1)
+    : "0.0";
     let answersHTML = "";
 
 
@@ -1081,11 +1103,18 @@ ${escapeHTML(formattedAnswers)}
 
     }
 
+const answeredCount = candidateAnswers.filter(
+    answer => answer !== null && answer !== undefined && answer !== ""
+).length;
 
-    document.getElementById("detailContent")
-        .innerHTML = `
+const displayCorrect = Number(result.score || 0);
+const displayIncorrect = Math.max(0, answeredCount - displayCorrect);
+const displayUnanswered = Math.max(0, totalQuestions - answeredCount);
+   document.getElementById("detailContent")
+    .innerHTML = `
 
-        <div class="detail-grid">
+    <div class="detail-grid">
+       
 
             <div class="detail-card">
 
