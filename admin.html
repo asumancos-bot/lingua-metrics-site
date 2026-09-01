@@ -1052,10 +1052,9 @@ for (let i = 0; i < totalQuestions; i++) {
 const successRate = totalQuestions > 0
     ? ((correctCount / totalQuestions) * 100).toFixed(1)
     : "0.0";
-    let answersHTML = "";
+let answersHTML = "";
 
-
-   if (answers) {
+if (answers) {
 
     let answerTableHTML = `
         <div class="answer-table-wrapper">
@@ -1111,39 +1110,17 @@ const successRate = totalQuestions > 0
         </div>
     `;
 
-    formattedAnswers = answerTableHTML;
+    answersHTML = `
+        <div class="answers-box">
+            <h3>Answer Data</h3>
+            ${answerTableHTML}
+        </div>
+    `;
 }
 
-       
+    
 
 
-        answersHTML = `
-
-            <div class="answers-box">
-
-                <h3>
-                    Answer Data
-                </h3>
-
-                <pre>
-${escapeHTML(formattedAnswers)}
-                </pre>
-
-            </div>
-
-        `;
-
-    }
-
-const answeredCount = candidateAnswers.filter(
-    answer => answer !== null && answer !== undefined && answer !== ""
-).length;
-
-const displayCorrect = Number(result.score || 0);
-const displayIncorrect = Math.max(0, answeredCount - displayCorrect);
-const displayUnanswered = Math.max(0, totalQuestions - answeredCount);
-   document.getElementById("detailContent")
-    .innerHTML = `
 
     <div class="detail-grid">
        
