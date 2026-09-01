@@ -941,27 +941,69 @@ function showProgress() {
 
   container.appendChild(progressBox);
 }
-let timeLeft = 60 * 60;
+const ASSESSMENT_DURATION = 60 * 60; // 60 dakika
+const TIMER_STORAGE_KEY = "linguaMetricsAssessmentStartTime";
 
-const timerInterval = setInterval(function () {
+let assessmentStartTime =
+  sessionStorage.getItem(TIMER_STORAGE_KEY);
+
+if (!assessmentStartTime) {
+  assessmentStartTime = Date.now();
+  sessionStorage.setItem(
+    TIMER_STORAGE_KEY,
+    assessmentStartTime
+  );
+} else {
+  assessmentStartTime = parseInt(
+    assessmentStartTime,
+    10
+  );
+}
+
+function updateTimer() {
+  const elapsedSeconds = Math.floor(
+    (Date.now() - assessmentStartTime) / 1000
+  );
+
+  const timeLeft = Math.max(
+    0,
+    ASSESSMENT_DURATION - elapsedSeconds
+  );
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
   document.getElementById("timer").textContent =
     "Time Remaining: " +
-    minutes + ":" +
+    minutes +
+    ":" +
     String(seconds).padStart(2, "0");
 
   if (timeLeft <= 0) {
     clearInterval(timerInterval);
-    alert("Time is up. Your assessment has ended.");
+
+    sessionStorage.removeItem(
+      TIMER_STORAGE_KEY
+    );
+
+    alert(
+      "Time is up. Your assessment has ended."
+    );
+
+    if (typeof finishAssessment === "function") {
+      finishAssessment();
+    }
+
     return;
   }
+}
 
-  timeLeft--;
+updateTimer();
 
-}, 1000);
+const timerInterval = setInterval(
+  updateTimer,
+  1000
+);
 showQuestion();
 function showQuestion() {  
 const container = document.getElementById("questionsContainer");
