@@ -27,7 +27,8 @@ export default async function handler(req, res) {
       level,
       score,
       totalQuestions,
-      answers,
+     answers,
+      correctAnswers,
       duration,
       completedAt,
     } = req.body;
@@ -41,7 +42,20 @@ export default async function handler(req, res) {
 
     // Answers verisini güvenli şekilde JSON'a çevir
     let answersJson = null;
+ let correctAnswersJson = null;
 
+    if (correctAnswers !== undefined && correctAnswers !== null) {
+      if (typeof correctAnswers === "string") {
+        try {
+          JSON.parse(correctAnswers);
+          correctAnswersJson = correctAnswers;
+        } catch (e) {
+          correctAnswersJson = JSON.stringify([]);
+        }
+      } else {
+        correctAnswersJson = JSON.stringify(correctAnswers);
+      }
+    }
     if (answers !== undefined && answers !== null) {
       if (typeof answers === "string") {
         try {
@@ -82,13 +96,17 @@ export default async function handler(req, res) {
         level TEXT,
         score NUMERIC,
         total_questions INTEGER,
-        answers JSONB,
+       answers JSONB,
+        correct_answers JSONB,
         duration INTEGER,
         completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
+await pool.query(`
+  ALTER TABLE assessment_results
+  ADD COLUMN IF NOT EXISTS correct_answers JSONB;
+`);
     const result = await pool.query(
       `
       INSERT INTO assessment_results (
@@ -101,7 +119,8 @@ export default async function handler(req, res) {
         level,
         score,
         total_questions,
-        answers,
+       answers,
+        correct_answers,
         duration,
         completed_at
       )
@@ -115,9 +134,10 @@ export default async function handler(req, res) {
         $7,
         $8,
         $9,
-        $10::jsonb,
-        $11,
-        $12
+      $10::jsonb,
+        $11::jsonb,
+        $12,
+        $13
       )
       RETURNING
         id,
@@ -138,7 +158,8 @@ export default async function handler(req, res) {
         level || null,
         score ?? null,
         totalQuestions ?? null,
-        answersJson,
+         answersJson,
+        correctAnswersJson,
         durationValue,
         completedAt || null,
       ]
