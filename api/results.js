@@ -59,9 +59,10 @@ export default async function handler(req, res) {
         score,
         level,
         total_questions,
-        answers,
-        duration,
-        completed_at
+      answers,
+correct_answers,
+duration,
+completed_at
       FROM assessment_results
       ORDER BY completed_at DESC
       LIMIT 100
