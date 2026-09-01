@@ -750,15 +750,17 @@ const questions = [
     answer: "A"
   }
   ];
-  const accessGate = document.getElementById("accessGate");
+ const accessGate = document.getElementById("accessGate");
 const accessCodeInput = document.getElementById("accessCode");
 const verifyAccessBtn = document.getElementById("verifyAccessBtn");
 const accessMessage = document.getElementById("accessMessage");
 
+let verifiedAccess = null;
+
 document.querySelector(".candidate-form:not(#accessGate)").style.display = "none";
 
 verifyAccessBtn.addEventListener("click", async function () {
-  
+
   const accessCode = accessCodeInput.value.trim();
 
   if (!accessCode) {
@@ -766,7 +768,11 @@ verifyAccessBtn.addEventListener("click", async function () {
     return;
   }
 
+  verifyAccessBtn.disabled = true;
+  verifyAccessBtn.textContent = "Verifying...";
+
   try {
+
     const response = await fetch("/api/verify-access", {
       method: "POST",
       headers: {
@@ -781,15 +787,48 @@ verifyAccessBtn.addEventListener("click", async function () {
 
     if (!data.success) {
       accessMessage.textContent = data.message;
+
+      verifyAccessBtn.disabled = false;
+      verifyAccessBtn.textContent = "Verify & Continue";
+
       return;
     }
 
+    /* SAVE VERIFIED ACCESS */
+    verifiedAccess = data.access;
+
+    /* FILL CANDIDATE INFORMATION AUTOMATICALLY */
+    document.getElementById("candidateName").value =
+      data.access.candidateName || "";
+
+    document.getElementById("candidateCompany").value =
+      data.access.organizationName || "";
+
+    document.getElementById("candidateEmail").value =
+      data.access.candidateEmail || "";
+
+    /* MAKE INFORMATION READ-ONLY */
+    document.getElementById("candidateName").readOnly = true;
+    document.getElementById("candidateCompany").readOnly = true;
+    document.getElementById("candidateEmail").readOnly = true;
+
+    /* HIDE ACCESS CODE */
     accessGate.style.display = "none";
+
+    /* SHOW CANDIDATE INFORMATION */
     document.getElementById("candidateForm").style.display = "block";
 
+    accessMessage.textContent = "";
+
   } catch (error) {
+
     console.error("ACCESS ERROR:", error);
-    accessMessage.textContent = "An error occurred. Please try again.";
+
+    accessMessage.textContent =
+      "An error occurred. Please try again.";
+
+    verifyAccessBtn.disabled = false;
+    verifyAccessBtn.textContent = "Verify & Continue";
   }
 });
 const startButton = document.getElementById("startTest");
