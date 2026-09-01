@@ -941,24 +941,19 @@ function showProgress() {
 
   container.appendChild(progressBox);
 }
-const ASSESSMENT_DURATION = 60 * 60; // 60 dakika
+const ASSESSMENT_DURATION = 60 * 60; // 60 minutes
 const TIMER_STORAGE_KEY = "linguaMetricsAssessmentStartTime";
 
-let assessmentStartTime =
-  sessionStorage.getItem(TIMER_STORAGE_KEY);
+let assessmentStartTime = localStorage.getItem(TIMER_STORAGE_KEY);
 
 if (!assessmentStartTime) {
-  assessmentStartTime = Date.now();
-  sessionStorage.setItem(
-    TIMER_STORAGE_KEY,
-    assessmentStartTime
-  );
+  assessmentStartTime = Date.now().toString();
+  localStorage.setItem(TIMER_STORAGE_KEY, assessmentStartTime);
 } else {
-  assessmentStartTime = parseInt(
-    assessmentStartTime,
-    10
-  );
+  assessmentStartTime = parseInt(assessmentStartTime, 10);
 }
+
+let timerInterval = null;
 
 function updateTimer() {
   const elapsedSeconds = Math.floor(
@@ -973,22 +968,25 @@ function updateTimer() {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  document.getElementById("timer").textContent =
-    "Time Remaining: " +
-    minutes +
-    ":" +
-    String(seconds).padStart(2, "0");
+  const timerElement = document.getElementById("timer");
+
+  if (timerElement) {
+    timerElement.textContent =
+      "Time Remaining: " +
+      minutes +
+      ":" +
+      String(seconds).padStart(2, "0");
+  }
 
   if (timeLeft <= 0) {
-    clearInterval(timerInterval);
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
 
-    sessionStorage.removeItem(
-      TIMER_STORAGE_KEY
-    );
+    localStorage.removeItem(TIMER_STORAGE_KEY);
 
-    alert(
-      "Time is up. Your assessment has ended."
-    );
+    alert("Time is up. Your assessment has ended.");
 
     if (typeof finishAssessment === "function") {
       finishAssessment();
@@ -1000,10 +998,7 @@ function updateTimer() {
 
 updateTimer();
 
-const timerInterval = setInterval(
-  updateTimer,
-  1000
-);
+timerInterval = setInterval(updateTimer, 1000);
 showQuestion();
 function showQuestion() {  
 const container = document.getElementById("questionsContainer");
