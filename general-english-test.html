@@ -1089,6 +1089,9 @@ if (score >= 93) {
       score: score,
       totalQuestions: questions.length,
       answers: userAnswers,
+      correctAnswers: questions.map(function(question) {
+    return question.answer;
+}),
       duration: "60 minutes",
       completedAt: new Date().toISOString()
     })
