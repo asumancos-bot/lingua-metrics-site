@@ -84,7 +84,94 @@ button:hover {
     text-align: center;
     margin-top: 15px;
 }
+/* ACCESS CODE MANAGEMENT */
 
+.access-section {
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+}
+
+.access-section h2 {
+    margin: 0 0 20px;
+    font-size: 21px;
+}
+
+.access-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.access-form input,
+.access-form select {
+    margin: 0;
+}
+
+.access-form button {
+    grid-column: 1 / -1;
+    width: fit-content;
+}
+
+.access-message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.access-code-result {
+    display: none;
+    margin-top: 20px;
+    padding: 18px;
+    background: #f4f7fa;
+    border-radius: 10px;
+}
+
+.access-code-value {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 8px 0 15px;
+}
+
+.copy-btn {
+    background: #ffffff;
+    color: #082c5c;
+    border: 1px solid #ccd6e0;
+}
+
+.access-table-wrapper {
+    overflow-x: auto;
+    margin-top: 25px;
+}
+
+.access-table {
+    min-width: 850px;
+}
+
+.status-available {
+    font-weight: bold;
+}
+
+.status-used {
+    font-weight: bold;
+}
+
+.status-expired {
+    font-weight: bold;
+}
+
+@media (max-width: 800px) {
+    .access-form {
+        grid-template-columns: 1fr;
+    }
+
+    .access-form button {
+        grid-column: auto;
+        width: 100%;
+    }
+}
 /* ADMIN */
 
 #adminPanel {
@@ -482,7 +569,99 @@ pre {
 
     </div>
 
+<!-- ACCESS CODE MANAGEMENT -->
 
+<div class="access-section">
+
+    <h2>Access Code Management</h2>
+
+    <div class="access-form">
+
+        <select id="accessTestName">
+            <option value="General English Assessment">
+                General English Assessment
+            </option>
+        </select>
+
+        <input
+            type="text"
+            id="accessOrganization"
+            placeholder="Organization"
+        >
+
+        <input
+            type="text"
+            id="accessCandidate"
+            placeholder="Candidate Name"
+        >
+
+        <input
+            type="email"
+            id="accessEmail"
+            placeholder="Candidate Email"
+        >
+
+        <input
+            type="datetime-local"
+            id="accessExpires"
+        >
+
+        <button onclick="createAccessCode()">
+            Create Access Code
+        </button>
+
+    </div>
+
+    <div
+        id="accessMessage"
+        class="access-message"
+    ></div>
+
+    <div
+        id="accessCodeResult"
+        class="access-code-result"
+    >
+
+        <div>New Access Code</div>
+
+        <div
+            id="newAccessCode"
+            class="access-code-value"
+        ></div>
+
+        <button
+            class="copy-btn"
+            onclick="copyAccessCode()"
+        >
+            Copy Code
+        </button>
+
+    </div>
+
+    <div class="access-table-wrapper">
+
+        <table class="access-table">
+
+            <thead>
+
+                <tr>
+                    <th>Access Code</th>
+                    <th>Candidate</th>
+                    <th>Organization</th>
+                    <th>Email</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="accessCodesBody"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
     <!-- FILTERS -->
 
     <div class="filters">
@@ -727,7 +906,7 @@ async function loadResults() {
         updateStatistics(allResults);
 
         renderResults(allResults);
-
+loadAccessCodes();
     }
 
 
@@ -1294,7 +1473,285 @@ function closeModal(event) {
 }
 
 
+/* ACCESS CODE MANAGEMENT */
 
+let accessCodes = [];
+let lastCreatedAccessCode = "";
+
+
+async function loadAccessCodes() {
+
+    try {
+
+        const response = await fetch(
+            "/api/access-codes",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": authHeader
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Could not load access codes.");
+        }
+
+        const data = await response.json();
+
+        accessCodes =
+            Array.isArray(data.accessCodes)
+                ? data.accessCodes
+                : [];
+
+        renderAccessCodes();
+
+    } catch (error) {
+
+        console.error(
+            "LOAD ACCESS CODES ERROR:",
+            error
+        );
+
+    }
+}
+
+
+async function createAccessCode() {
+
+    const testName =
+        document.getElementById("accessTestName").value;
+
+    const organizationName =
+        document.getElementById("accessOrganization").value.trim();
+
+    const candidateName =
+        document.getElementById("accessCandidate").value.trim();
+
+    const candidateEmail =
+        document.getElementById("accessEmail").value.trim();
+
+    const expiresAt =
+        document.getElementById("accessExpires").value;
+
+    const message =
+        document.getElementById("accessMessage");
+
+    if (!candidateName) {
+
+        message.textContent =
+            "Please enter the candidate name.";
+
+        return;
+    }
+
+    if (!candidateEmail) {
+
+        message.textContent =
+            "Please enter the candidate email.";
+
+        return;
+    }
+
+    try {
+
+        message.textContent =
+            "Creating access code...";
+
+        const response = await fetch(
+            "/api/access-codes",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": authHeader
+                },
+
+                body: JSON.stringify({
+                    testName,
+                    organizationName,
+                    candidateName,
+                    candidateEmail,
+                    expiresAt
+                })
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message ||
+                "Could not create access code."
+            );
+        }
+
+        lastCreatedAccessCode =
+            data.accessCode.access_code;
+
+        document.getElementById(
+            "newAccessCode"
+        ).textContent =
+            lastCreatedAccessCode;
+
+        document.getElementById(
+            "accessCodeResult"
+        ).style.display = "block";
+
+        message.textContent =
+            "Access code created successfully.";
+
+        document.getElementById(
+            "accessOrganization"
+        ).value = "";
+
+        document.getElementById(
+            "accessCandidate"
+        ).value = "";
+
+        document.getElementById(
+            "accessEmail"
+        ).value = "";
+
+        document.getElementById(
+            "accessExpires"
+        ).value = "";
+
+        await loadAccessCodes();
+
+    } catch (error) {
+
+        console.error(
+            "CREATE ACCESS CODE ERROR:",
+            error
+        );
+
+        message.textContent =
+            error.message ||
+            "Could not create access code.";
+    }
+}
+
+
+function renderAccessCodes() {
+
+    const body =
+        document.getElementById(
+            "accessCodesBody"
+        );
+
+    if (!body) return;
+
+    body.innerHTML = "";
+
+    if (!accessCodes.length) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty">
+                    No access codes found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    accessCodes.forEach(code => {
+
+        const row =
+            document.createElement("tr");
+
+        let status = "Available";
+        let statusClass = "status-available";
+
+        if (code.is_used) {
+
+            status = "Used";
+            statusClass = "status-used";
+
+        } else if (
+            code.expires_at &&
+            new Date(code.expires_at) < new Date()
+        ) {
+
+            status = "Expired";
+            statusClass = "status-expired";
+        }
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHTML(
+                    code.access_code || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    code.candidate_name || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    code.organization_name || ""
+                )}
+            </td>
+
+            <td>
+                ${escapeHTML(
+                    code.candidate_email || ""
+                )}
+            </td>
+
+            <td>
+                ${formatDate(
+                    code.expires_at
+                )}
+            </td>
+
+            <td class="${statusClass}">
+                ${status}
+            </td>
+
+        `;
+
+        body.appendChild(row);
+
+    });
+}
+
+
+async function copyAccessCode() {
+
+    if (!lastCreatedAccessCode) {
+        return;
+    }
+
+    try {
+
+        await navigator.clipboard.writeText(
+            lastCreatedAccessCode
+        );
+
+        document.getElementById(
+            "accessMessage"
+        ).textContent =
+            "Access code copied.";
+
+    } catch (error) {
+
+        console.error(
+            "COPY ERROR:",
+            error
+        );
+
+    }
+}
 /* LOGOUT */
 
 function logout() {
