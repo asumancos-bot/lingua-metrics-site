@@ -83,15 +83,7 @@ export default async function handler(req, res) {
         message: "This access code has expired.",
       });
     }
-await pool.query(
-  `
-  UPDATE assessment_access_codes
-  SET is_used = TRUE,
-      used_at = CURRENT_TIMESTAMP
-  WHERE id = $1
-  `,
-  [access.id]
-);
+
     return res.status(200).json({
       success: true,
       message: "Access granted.",
