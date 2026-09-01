@@ -1055,27 +1055,64 @@ const successRate = totalQuestions > 0
     let answersHTML = "";
 
 
-    if (answers) {
+   if (answers) {
 
-        let formattedAnswers;
+    let answerTableHTML = `
+        <div class="answer-table-wrapper">
+            <table class="answer-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Candidate Answer</th>
+                        <th>Correct Answer</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
+    for (let i = 0; i < totalQuestions; i++) {
 
-        try {
+        const candidate = candidateAnswers[i];
+        const correct = correctAnswers[i];
 
-            formattedAnswers =
-                typeof answers === "string"
-                    ? JSON.stringify(
-                        JSON.parse(answers),
-                        null,
-                        2
-                      )
-                    : JSON.stringify(
-                        answers,
-                        null,
-                        2
-                      );
+        const isUnanswered =
+            candidate === null ||
+            candidate === undefined ||
+            candidate === "";
 
+        const isCorrect =
+            !isUnanswered &&
+            candidate === correct;
+
+        let resultHTML = "";
+
+        if (isUnanswered) {
+            resultHTML = `<span class="result-unanswered">—</span>`;
+        } else if (isCorrect) {
+            resultHTML = `<span class="result-correct">✓ Correct</span>`;
+        } else {
+            resultHTML = `<span class="result-incorrect">✕ Incorrect</span>`;
         }
+
+        answerTableHTML += `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${isUnanswered ? "—" : escapeHTML(candidate)}</td>
+                <td>${escapeHTML(correct ?? "—")}</td>
+                <td>${resultHTML}</td>
+            </tr>
+        `;
+    }
+
+    answerTableHTML += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    formattedAnswers = answerTableHTML;
+}
 
         catch {
 
