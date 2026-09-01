@@ -46,7 +46,10 @@ export default async function handler(req, res) {
   }
 
   try {
-
+await pool.query(`
+  ALTER TABLE assessment_results
+  ADD COLUMN IF NOT EXISTS correct_answers JSONB;
+`);
     const result = await pool.query(`
       SELECT
         id,
