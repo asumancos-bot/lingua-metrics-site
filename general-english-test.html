@@ -846,14 +846,21 @@ verifyAccessBtn.addEventListener("click", async function () {
       return;
     }
 
-    verifiedAccess = data.access;
-   sessionStorage.setItem(ACCESS_KEY, JSON.stringify(verifiedAccess));
+   verifiedAccess = data.access;
 
-    candidate = {
-      name: verifiedAccess.candidateName || "",
-      email: verifiedAccess.candidateEmail || "",
-      company: verifiedAccess.organizationName || ""
-    };
+// Yeni access code = yeni sınav oturumu
+localStorage.removeItem(STARTED_KEY);
+localStorage.removeItem(TIMER_KEY);
+localStorage.removeItem(PROGRESS_KEY);
+localStorage.removeItem(CANDIDATE_KEY);
+
+sessionStorage.setItem(ACCESS_KEY, JSON.stringify(verifiedAccess));
+
+candidate = {
+    name: verifiedAccess.candidateName || "",
+    email: verifiedAccess.candidateEmail || "",
+    company: verifiedAccess.organizationName || ""
+};
     saveAll();
     fillCandidate();
 
