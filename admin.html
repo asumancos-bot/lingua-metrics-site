@@ -822,7 +822,12 @@ pre {
 <script>
 
 let authHeader = "";
+const savedAdminAuth =
+    sessionStorage.getItem("linguaAdminAuth");
 
+if (savedAdminAuth) {
+    authHeader = savedAdminAuth;
+}
 let allResults = [];
 let refreshTimer = null;
 let isRefreshing = false;
@@ -1849,7 +1854,7 @@ function startAutoRefresh() {
             return;
         }
 
-        refreshAdminData();
+       loadResults();
 
     }, 10000);
 
@@ -1904,6 +1909,12 @@ async function refreshAdminData() {
         isRefreshing = false;
 
     }
+}
+    /* INITIALIZE ADMIN */
+
+if (authHeader) {
+    loadResults();
+    startAutoRefresh();
 
 }
 </script>
