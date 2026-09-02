@@ -25,8 +25,11 @@ export default async function handler(req, res) {
       });
     }
 
-    const code = accessCode.trim();
+    const normalizedCode = accessCode.trim();
 
+    /*
+     * Make sure the table exists.
+     */
     await pool.query(`
       CREATE TABLE IF NOT EXISTS assessment_access_codes (
         id SERIAL PRIMARY KEY,
@@ -43,19 +46,23 @@ export default async function handler(req, res) {
     `);
 
     /*
-     * IMPORTANT:
-     * The access code is consumed atomically.
+     * Atomically claim the access code.
      *
-     * Only ONE request can successfully change
-     * is_used from FALSE to TRUE.
+     * IMPORTANT:
+     * The code becomes USED at the moment access is successfully granted.
+     *
+     * Because this is a single UPDATE statement with
+     * "is_used = FALSE", two users cannot successfully claim
+     * the same code at the same time.
      */
-    const result = await pool.query(
+    const claimResult = await pool.query(
       `
       UPDATE assessment_access_codes
       SET
         is_used = TRUE,
         used_at = CURRENT_TIMESTAMP
-      WHERE access_code = $1
+      WHERE
+        access_code = $1
         AND is_used = FALSE
         AND (
           expires_at IS NULL
@@ -69,24 +76,25 @@ export default async function handler(req, res) {
         candidate_name,
         candidate_email,
         is_used,
-        expires_at;
+        expires_at,
+        used_at;
       `,
-      [code]
+      [normalizedCode]
     );
 
     /*
-     * Successful update = code was available
-     * and has now been consumed.
+     * SUCCESS
+     *
+     * The code has just been claimed successfully.
      */
-    if (result.rows.length > 0) {
-      const access = result.rows[0];
+    if (claimResult.rows.length > 0) {
+      const access = claimResult.rows[0];
 
       return res.status(200).json({
         success: true,
         message: "Access granted.",
         access: {
           id: access.id,
-          accessCode: access.access_code,
           testName: access.test_name,
           organizationName: access.organization_name,
           candidateName: access.candidate_name,
@@ -96,39 +104,50 @@ export default async function handler(req, res) {
     }
 
     /*
-     * If UPDATE returned nothing, determine why.
+     * If the atomic UPDATE did not claim the code,
+     * determine why.
      */
-    const existing = await pool.query(
+    const existingResult = await pool.query(
       `
       SELECT
+        id,
         is_used,
         expires_at
       FROM assessment_access_codes
       WHERE access_code = $1
       LIMIT 1;
       `,
-      [code]
+      [normalizedCode]
     );
 
-    if (existing.rows.length === 0) {
+    /*
+     * Code does not exist.
+     */
+    if (existingResult.rows.length === 0) {
       return res.status(401).json({
         success: false,
         message: "Invalid access code.",
       });
     }
 
-    const access = existing.rows[0];
+    const existing = existingResult.rows[0];
 
-    if (access.is_used) {
+    /*
+     * Code was already used.
+     */
+    if (existing.is_used) {
       return res.status(403).json({
         success: false,
         message: "This access code has already been used.",
       });
     }
 
+    /*
+     * Code exists but has expired.
+     */
     if (
-      access.expires_at &&
-      new Date(access.expires_at) < new Date()
+      existing.expires_at &&
+      new Date(existing.expires_at) < new Date()
     ) {
       return res.status(403).json({
         success: false,
@@ -136,6 +155,9 @@ export default async function handler(req, res) {
       });
     }
 
+    /*
+     * Fallback protection.
+     */
     return res.status(403).json({
       success: false,
       message: "This access code cannot be used.",
