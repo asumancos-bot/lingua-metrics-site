@@ -25,6 +25,8 @@ export default async function handler(req, res) {
       });
     }
 
+    const code = accessCode.trim();
+
     await pool.query(`
       CREATE TABLE IF NOT EXISTS assessment_access_codes (
         id SERIAL PRIMARY KEY,
@@ -40,9 +42,26 @@ export default async function handler(req, res) {
       );
     `);
 
+    /*
+     * IMPORTANT:
+     * The access code is consumed atomically.
+     *
+     * Only ONE request can successfully change
+     * is_used from FALSE to TRUE.
+     */
     const result = await pool.query(
       `
-      SELECT
+      UPDATE assessment_access_codes
+      SET
+        is_used = TRUE,
+        used_at = CURRENT_TIMESTAMP
+      WHERE access_code = $1
+        AND is_used = FALSE
+        AND (
+          expires_at IS NULL
+          OR expires_at >= CURRENT_TIMESTAMP
+        )
+      RETURNING
         id,
         access_code,
         test_name,
@@ -50,22 +69,55 @@ export default async function handler(req, res) {
         candidate_name,
         candidate_email,
         is_used,
+        expires_at;
+      `,
+      [code]
+    );
+
+    /*
+     * Successful update = code was available
+     * and has now been consumed.
+     */
+    if (result.rows.length > 0) {
+      const access = result.rows[0];
+
+      return res.status(200).json({
+        success: true,
+        message: "Access granted.",
+        access: {
+          id: access.id,
+          accessCode: access.access_code,
+          testName: access.test_name,
+          organizationName: access.organization_name,
+          candidateName: access.candidate_name,
+          candidateEmail: access.candidate_email,
+        },
+      });
+    }
+
+    /*
+     * If UPDATE returned nothing, determine why.
+     */
+    const existing = await pool.query(
+      `
+      SELECT
+        is_used,
         expires_at
       FROM assessment_access_codes
       WHERE access_code = $1
       LIMIT 1;
       `,
-      [accessCode.trim()]
+      [code]
     );
 
-    if (result.rows.length === 0) {
+    if (existing.rows.length === 0) {
       return res.status(401).json({
         success: false,
         message: "Invalid access code.",
       });
     }
 
-    const access = result.rows[0];
+    const access = existing.rows[0];
 
     if (access.is_used) {
       return res.status(403).json({
@@ -84,16 +136,9 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Access granted.",
-      access: {
-        id: access.id,
-        testName: access.test_name,
-        organizationName: access.organization_name,
-        candidateName: access.candidate_name,
-        candidateEmail: access.candidate_email,
-      },
+    return res.status(403).json({
+      success: false,
+      message: "This access code cannot be used.",
     });
 
   } catch (error) {
