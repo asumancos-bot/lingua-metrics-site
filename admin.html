@@ -1608,8 +1608,9 @@ async function createAccessCode() {
             "accessCodeResult"
         ).style.display = "block";
 
-        message.textContent =
-            "Access code created successfully.";
+     message.textContent = data.emailSent
+  ? "Access code created and emailed successfully."
+  : data.message || "Access code created successfully.";
 
         document.getElementById(
             "accessOrganization"
