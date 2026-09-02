@@ -896,7 +896,11 @@ document.getElementById("startTest").addEventListener("click", function () {
 function startTimer() {
   if (timerInterval) clearInterval(timerInterval);
   updateTimer();
-  timerInterval = setInterval(updateTimer, 1000);
+ timerInterval = setInterval(updateTimer, 1000);
+
+document.addEventListener("visibilitychange", updateTimer);
+window.addEventListener("pageshow", updateTimer);
+window.addEventListener("focus", updateTimer);
 }
 
 function updateTimer() {
