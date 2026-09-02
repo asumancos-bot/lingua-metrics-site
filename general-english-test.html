@@ -754,13 +754,72 @@ const questions = [
 const accessCodeInput = document.getElementById("accessCode");
 const verifyAccessBtn = document.getElementById("verifyAccessBtn");
 const accessMessage = document.getElementById("accessMessage");
+const candidateForm = document.getElementById("candidateForm");
+const testArea = document.getElementById("testArea");
+const candidateNameInput = document.getElementById("candidateName");
+const candidateCompanyInput = document.getElementById("candidateCompany");
+const candidateEmailInput = document.getElementById("candidateEmail");
+
+const ACCESS_KEY = "linguaMetricsVerifiedAccess";
+const CANDIDATE_KEY = "linguaMetricsCandidate";
+const STARTED_KEY = "linguaMetricsAssessmentStarted";
+const TIMER_KEY = "linguaMetricsAssessmentStartTime";
+const PROGRESS_KEY = "linguaMetricsAssessmentProgress";
+const ASSESSMENT_DURATION = 60 * 60;
 
 let verifiedAccess = null;
+let candidate = { name: "", email: "", company: "" };
+let currentQuestion = 0;
+let userAnswers = [];
+let timerInterval = null;
+let finished = false;
+let progressButton = null;
 
-document.querySelector(".candidate-form:not(#accessGate)").style.display = "none";
+function saveAll() {
+  localStorage.setItem(CANDIDATE_KEY, JSON.stringify(candidate));
+  localStorage.setItem(PROGRESS_KEY, JSON.stringify({
+    currentQuestion: currentQuestion,
+    userAnswers: userAnswers
+  }));
+}
+
+function loadAll() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CANDIDATE_KEY) || "null");
+    if (c) candidate = {
+      name: c.name || "",
+      email: c.email || "",
+      company: c.company || ""
+    };
+
+    const p = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "null");
+    if (p) {
+      currentQuestion = Number.isInteger(p.currentQuestion) ? p.currentQuestion : 0;
+      userAnswers = Array.isArray(p.userAnswers) ? p.userAnswers : [];
+    }
+  } catch (e) {
+    console.error("Restore error:", e);
+  }
+}
+
+function fillCandidate() {
+  candidateNameInput.value = candidate.name;
+  candidateCompanyInput.value = candidate.company;
+  candidateEmailInput.value = candidate.email;
+  candidateNameInput.readOnly = true;
+  candidateCompanyInput.readOnly = true;
+  candidateEmailInput.readOnly = true;
+}
+
+function showTest() {
+  accessGate.style.display = "none";
+  candidateForm.style.display = "none";
+  testArea.style.display = "block";
+  document.getElementById("candidateInfo").textContent =
+    candidate.name + (candidate.company ? " — " + candidate.company : "");
+}
 
 verifyAccessBtn.addEventListener("click", async function () {
-
   const accessCode = accessCodeInput.value.trim();
 
   if (!accessCode) {
@@ -772,500 +831,373 @@ verifyAccessBtn.addEventListener("click", async function () {
   verifyAccessBtn.textContent = "Verifying...";
 
   try {
-
     const response = await fetch("/api/verify-access", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        accessCode: accessCode
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessCode: accessCode })
     });
 
     const data = await response.json();
 
     if (!data.success) {
       accessMessage.textContent = data.message;
-
       verifyAccessBtn.disabled = false;
       verifyAccessBtn.textContent = "Verify & Continue";
-
       return;
     }
 
-    /* SAVE VERIFIED ACCESS */
     verifiedAccess = data.access;
+    localStorage.setItem(ACCESS_KEY, JSON.stringify(verifiedAccess));
 
-    /* FILL CANDIDATE INFORMATION AUTOMATICALLY */
-    document.getElementById("candidateName").value =
-      data.access.candidateName || "";
+    candidate = {
+      name: verifiedAccess.candidateName || "",
+      email: verifiedAccess.candidateEmail || "",
+      company: verifiedAccess.organizationName || ""
+    };
+    saveAll();
+    fillCandidate();
 
-    document.getElementById("candidateCompany").value =
-      data.access.organizationName || "";
-
-    document.getElementById("candidateEmail").value =
-      data.access.candidateEmail || "";
-
-    /* MAKE INFORMATION READ-ONLY */
-    document.getElementById("candidateName").readOnly = true;
-    document.getElementById("candidateCompany").readOnly = true;
-    document.getElementById("candidateEmail").readOnly = true;
-
-    /* HIDE ACCESS CODE */
     accessGate.style.display = "none";
-
-    /* SHOW CANDIDATE INFORMATION */
-    document.getElementById("candidateForm").style.display = "block";
-
+    candidateForm.style.display = "block";
     accessMessage.textContent = "";
 
   } catch (error) {
-
     console.error("ACCESS ERROR:", error);
-
-    accessMessage.textContent =
-      "An error occurred. Please try again.";
-
+    accessMessage.textContent = "An error occurred. Please try again.";
     verifyAccessBtn.disabled = false;
     verifyAccessBtn.textContent = "Verify & Continue";
   }
 });
-const startButton = document.getElementById("startTest");
-let currentQuestion = 0;
-let userAnswers = [];
-startButton.addEventListener("click", function () {
 
-  const name = document.getElementById("candidateName").value.trim();
-  const email = document.getElementById("candidateEmail").value.trim();
-  const company = document.getElementById("candidateCompany").value.trim();
+document.getElementById("startTest").addEventListener("click", function () {
+  candidate.name = candidateNameInput.value.trim();
+  candidate.email = candidateEmailInput.value.trim();
+  candidate.company = candidateCompanyInput.value.trim();
 
-  if (!name || !email) {
+  if (!candidate.name || !candidate.email) {
     alert("Please enter your full name and email address.");
     return;
   }
 
-  document.getElementById("candidateForm").style.display = "none";
+  localStorage.setItem(STARTED_KEY, "true");
 
-  document.getElementById("candidateInfo").textContent =
-    name + (company ? " — " + company : "");
+  // Timer starts ONLY when the candidate actually starts the assessment.
+  if (!localStorage.getItem(TIMER_KEY)) {
+    localStorage.setItem(TIMER_KEY, Date.now().toString());
+  }
 
-  document.getElementById("testArea").style.display = "block";
-const progressButton = document.createElement("button");
-
-progressButton.type = "button";
-progressButton.className = "start-btn";
-progressButton.textContent = "View Progress";
-
-progressButton.addEventListener("click", function () {
-  showProgress();
+  loadAll();
+  saveAll();
+  showTest();
+  startTimer();
+  showQuestion();
 });
 
-document.getElementById("testArea").insertBefore(
-  progressButton,
-  document.getElementById("questionsContainer")
-);
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  updateTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+  const start = parseInt(localStorage.getItem(TIMER_KEY), 10);
+  if (!Number.isFinite(start)) return;
+
+  const elapsed = Math.floor((Date.now() - start) / 1000);
+  const timeLeft = Math.max(0, ASSESSMENT_DURATION - elapsed);
+
+  const timer = document.getElementById("timer");
+  if (timer) {
+    timer.textContent =
+      "Time Remaining: " +
+      Math.floor(timeLeft / 60) + ":" +
+      String(timeLeft % 60).padStart(2, "0");
+  }
+
+  if (timeLeft <= 0) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    alert("Time is up. Your assessment has ended.");
+    finishAssessment(true);
+  }
+}
+
 function showProgress() {
-
   const container = document.getElementById("questionsContainer");
-
-  const answeredCount = userAnswers.filter(function(answer) {
-    return answer !== undefined;
-  }).length;
-
-  const blankCount = questions.length - answeredCount;
+  const answered = userAnswers.filter(a => a !== undefined).length;
 
   container.innerHTML = "";
 
-  const progressBox = document.createElement("div");
-
-  progressBox.style.background = "#ffffff";
-  progressBox.style.padding = "25px";
-  progressBox.style.borderRadius = "16px";
-  progressBox.style.border = "1px solid #d7e5eb";
+  const box = document.createElement("div");
+  box.style.cssText =
+    "background:#fff;padding:25px;border-radius:16px;border:1px solid #d7e5eb";
 
   const title = document.createElement("h2");
   title.textContent = "Assessment Progress";
   title.style.color = "#082c5c";
-
-  progressBox.appendChild(title);
+  box.appendChild(title);
 
   const summary = document.createElement("p");
   summary.innerHTML =
-    "🟢 <strong>Answered:</strong> " + answeredCount +
-    " &nbsp;&nbsp;&nbsp; " +
-    "⚪ <strong>Blank:</strong> " + blankCount;
-
-  progressBox.appendChild(summary);
+    "🟢 <strong>Answered:</strong> " + answered +
+    " &nbsp;&nbsp;&nbsp; ⚪ <strong>Blank:</strong> " +
+    (questions.length - answered);
+  box.appendChild(summary);
 
   const grid = document.createElement("div");
+  grid.style.cssText =
+    "display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin-top:20px";
 
-  grid.style.display = "grid";
-  grid.style.gridTemplateColumns = "repeat(10, 1fr)";
-  grid.style.gap = "8px";
-  grid.style.marginTop = "20px";
+  questions.forEach(function(_, index) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = index + 1;
+    b.style.cssText =
+      "padding:10px;border-radius:8px;border:1px solid #d7e5eb;cursor:pointer;font-weight:700;" +
+      (userAnswers[index] !== undefined
+        ? "background:#dff3e4;color:#247a3d"
+        : "background:#eee;color:#666");
 
-  questions.forEach(function(question, index) {
-
-    const questionButton = document.createElement("button");
-
-    questionButton.type = "button";
-    questionButton.textContent = index + 1;
-
-    questionButton.style.padding = "10px";
-    questionButton.style.borderRadius = "8px";
-    questionButton.style.border = "1px solid #d7e5eb";
-    questionButton.style.cursor = "pointer";
-    questionButton.style.fontWeight = "700";
-
-    if (userAnswers[index] !== undefined) {
-      questionButton.style.background = "#dff3e4";
-      questionButton.style.color = "#247a3d";
-    } else {
-      questionButton.style.background = "#eeeeee";
-      questionButton.style.color = "#666666";
-    }
-
-    questionButton.addEventListener("click", function() {
-
+    b.addEventListener("click", function() {
       currentQuestion = index;
-
+      saveAll();
       showQuestion();
-
     });
 
-    grid.appendChild(questionButton);
+    grid.appendChild(b);
   });
 
-  progressBox.appendChild(grid);
-
-  container.appendChild(progressBox);
-}
-const ASSESSMENT_DURATION = 60 * 60; // 60 minutes
-const TIMER_STORAGE_KEY = "linguaMetricsAssessmentStartTime";
-
-let assessmentStartTime = localStorage.getItem(TIMER_STORAGE_KEY);
-
-if (!assessmentStartTime) {
-  assessmentStartTime = Date.now().toString();
-  localStorage.setItem(TIMER_STORAGE_KEY, assessmentStartTime);
-} else {
-  assessmentStartTime = parseInt(assessmentStartTime, 10);
+  box.appendChild(grid);
+  container.appendChild(box);
 }
 
-let timerInterval = null;
+function finishAssessment(forceFinish) {
+  if (finished) return;
 
-function updateTimer() {
-  const elapsedSeconds = Math.floor(
-    (Date.now() - assessmentStartTime) / 1000
-  );
-
-  const timeLeft = Math.max(
-    0,
-    ASSESSMENT_DURATION - elapsedSeconds
-  );
-
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
-  const timerElement = document.getElementById("timer");
-
-  if (timerElement) {
-    timerElement.textContent =
-      "Time Remaining: " +
-      minutes +
-      ":" +
-      String(seconds).padStart(2, "0");
-  }
-
-  if (timeLeft <= 0) {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
+  if (!forceFinish) {
+    const selected =
+      document.querySelector('input[name="currentQuestion"]:checked');
+    if (selected) {
+      userAnswers[currentQuestion] = selected.value;
+      saveAll();
     }
 
-    localStorage.removeItem(TIMER_STORAGE_KEY);
-
-    alert("Time is up. Your assessment has ended.");
-
-    if (typeof finishAssessment === "function") {
-      finishAssessment();
-    }
-
-    return;
-  }
-}
-
-updateTimer();
-
-timerInterval = setInterval(updateTimer, 1000);
-showQuestion();
-function showQuestion() {  
-const container = document.getElementById("questionsContainer");
-
-  container.innerHTML = "";
-
-const item = questions[currentQuestion];
-
- const questionBox = document.createElement("div");
-
-questionBox.style.background = "#ffffff";
-questionBox.style.border = "1px solid #d7e5eb";
-questionBox.style.borderRadius = "12px";
-questionBox.style.padding = "25px";
-questionBox.style.marginBottom = "20px";
-
-const title = document.createElement("h3");
-title.textContent =
-  "Question " + (currentQuestion + 1) + " / 100";
-title.style.color = "#082c5c";
-
-questionBox.appendChild(title);
-
-const questionText = document.createElement("p");
-questionText.textContent = item.question;
-questionText.style.fontWeight = "700";
-questionText.style.fontSize = "17px";
-
-questionBox.appendChild(questionText);
-
-item.options.forEach(function (option, optionIndex) {
-
-  const label = document.createElement("label");
-
-  label.style.display = "block";
-  label.style.padding = "10px";
-  label.style.cursor = "pointer";
-
-  const radio = document.createElement("input");
-
-  radio.type = "radio";
-  radio.name = "currentQuestion";
-  radio.value = String.fromCharCode(65 + optionIndex);
-radio.addEventListener("change", function() {
-  userAnswers[currentQuestion] = radio.value;
-});
-if (userAnswers[currentQuestion] === radio.value) {
-  radio.checked = true;
-}
-  label.appendChild(radio);
-
-  label.appendChild(
-    document.createTextNode(
-      " " + String.fromCharCode(65 + optionIndex) + ") " + option
-    )
-  );
-
-  questionBox.appendChild(label);
-});
-const previousButton = document.createElement("button");
-
-previousButton.type = "button";
-previousButton.className = "start-btn";
-previousButton.textContent = "← Previous Question";
-
-previousButton.disabled = currentQuestion === 0;
-
-previousButton.addEventListener("click", function () {
-  if (currentQuestion > 0) {
-    currentQuestion--;
-    showQuestion();
-
-    
-  }
-});
-
-const nextButton = document.createElement("button");
-
-nextButton.type = "button";
-nextButton.className = "start-btn";
-nextButton.textContent = "Next Question →";
-
-nextButton.addEventListener("click", function () {
-
-  const selected =
-    document.querySelector('input[name="currentQuestion"]:checked');
-
-  if (selected) {
-    userAnswers[currentQuestion] = selected.value;
+    const attempted = userAnswers.filter(a => a !== undefined).length;
+    if (!confirm(
+      "Are you sure you want to finish the assessment?\n\n" +
+      "Answered questions: " + attempted
+    )) return;
   }
 
-  if (currentQuestion < questions.length - 1) {
-    currentQuestion++;
-    showQuestion();
-  }
-
-});
-
-
-/* FINISH ASSESSMENT BUTTON */
-
-const finishButton = document.createElement("button");
-
-finishButton.type = "button";
-finishButton.className = "start-btn";
-finishButton.textContent = "✓ Finish Assessment";
-
-finishButton.addEventListener("click", function () {
-
-  const selected =
-    document.querySelector('input[name="currentQuestion"]:checked');
-
-  if (selected) {
-    userAnswers[currentQuestion] = selected.value;
-  }
+  finished = true;
 
   const score = userAnswers.reduce(function(total, answer, index) {
     return total + (answer === questions[index].answer ? 1 : 0);
   }, 0);
-let estimatedLevel = "A1";
 
-if (score >= 93) {
-  estimatedLevel = "C2";
-} else if (score >= 86) {
-  estimatedLevel = "C1.2";
-} else if (score >= 76) {
-  estimatedLevel = "C1.1";
-} else if (score >= 63) {
-  estimatedLevel = "B2.2";
-} else if (score >= 51) {
-  estimatedLevel = "B2.1";
-} else if (score >= 38) {
-  estimatedLevel = "B1.2";
-} else if (score >= 26) {
-  estimatedLevel = "B1.1";
-} else if (score >= 16) {
-  estimatedLevel = "A2.2";
-} else if (score >= 8) {
-  estimatedLevel = "A2.1";
-}
-  const totalAttempted = userAnswers.filter(function(answer) {
-    return answer !== undefined;
-  }).length;
-
-  if (!confirm(
-    "Are you sure you want to finish the assessment?\n\n" +
-    "Answered questions: " + totalAttempted
-  )) {
-    return;
-  }
+  let estimatedLevel = "A1";
+  if (score >= 93) estimatedLevel = "C2";
+  else if (score >= 86) estimatedLevel = "C1.2";
+  else if (score >= 76) estimatedLevel = "C1.1";
+  else if (score >= 63) estimatedLevel = "B2.2";
+  else if (score >= 51) estimatedLevel = "B2.1";
+  else if (score >= 38) estimatedLevel = "B1.2";
+  else if (score >= 26) estimatedLevel = "B1.1";
+  else if (score >= 16) estimatedLevel = "A2.2";
+  else if (score >= 8) estimatedLevel = "A2.1";
 
   fetch("/api/save-result", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      candidateName: name,
-      email: email,
-      organizationName: company,
+      candidateName: candidate.name,
+      email: candidate.email,
+      organizationName: candidate.company,
       testName: "General English Assessment",
-      candidateType: company ? "corporate" : "individual",
-    level: estimatedLevel,
+      candidateType: candidate.company ? "corporate" : "individual",
+      level: estimatedLevel,
       score: score,
       totalQuestions: questions.length,
       answers: userAnswers,
-    correctAnswers: questions.map(function(question) {
-    return question.answer;
-}),
+      correctAnswers: questions.map(q => q.answer),
       duration: "60 minutes",
       completedAt: new Date().toISOString()
     })
   })
-  .then(function(response) {
-    return response.json();
-  })
+  .then(r => r.json())
   .then(function(data) {
-
     console.log("Result saved:", data);
 
-    document.getElementById("timer").style.display = "none";
-
-    document.getElementById("testArea")
-      .querySelector(".test-info").style.display = "none";
-
     clearInterval(timerInterval);
+    localStorage.removeItem(TIMER_KEY);
+    localStorage.removeItem(STARTED_KEY);
+    localStorage.removeItem(PROGRESS_KEY);
+    localStorage.removeItem(CANDIDATE_KEY);
+    localStorage.removeItem(ACCESS_KEY);
 
-    progressButton.style.display = "none";
+    document.getElementById("timer").style.display = "none";
+    document.getElementById("testArea").querySelector(".test-info").style.display = "none";
+    if (progressButton) progressButton.style.display = "none";
 
     document.getElementById("questionsContainer").innerHTML = `
-      <div style="
-        background:#ffffff;
-        border:1px solid #d7e5eb;
-        border-radius:16px;
-        padding:40px;
-        text-align:center;
-      ">
-
-        <h2 style="color:#082c5c;">
-          Assessment Completed
-        </h2>
-
-        <p style="font-size:18px; margin-top:20px;">
-          Thank you for completing the assessment.
-        </p>
-
-        <p style="margin-top:10px;">
-          Your assessment has been successfully submitted.
-        </p>
-
-       
-
+      <div style="background:#fff;border:1px solid #d7e5eb;border-radius:16px;padding:40px;text-align:center">
+        <h2 style="color:#082c5c">Assessment Completed</h2>
+        <p style="font-size:18px;margin-top:20px">Thank you for completing the assessment.</p>
+        <p style="margin-top:10px">Your assessment has been successfully submitted.</p>
       </div>
     `;
-
   })
   .catch(function(error) {
-
     console.error("Result save error:", error);
-
+    finished = false;
     alert("There was an error submitting the assessment.");
-
   });
-
-});
-const buttonContainer = document.createElement("div");
-
-buttonContainer.style.display = "flex";
-buttonContainer.style.flexDirection = "column";
-buttonContainer.style.gap = "12px";
-buttonContainer.style.marginTop = "20px";
-
-const topButtons = document.createElement("div");
-
-topButtons.style.display = "flex";
-topButtons.style.gap = "12px";
-topButtons.style.width = "100%";
-
-previousButton.style.width = "50%";
-previousButton.style.marginTop = "0";
-
-nextButton.style.width = "50%";
-nextButton.style.marginTop = "0";
-
-topButtons.appendChild(previousButton);
-topButtons.appendChild(nextButton);
-
-finishButton.style.width = "100%";
-finishButton.style.marginTop = "0";
-
-buttonContainer.appendChild(topButtons);
-buttonContainer.appendChild(finishButton);
-
-questionBox.appendChild(buttonContainer);
-
-container.appendChild(questionBox);
 }
-showQuestion();
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+
+function showQuestion() {
+  const container = document.getElementById("questionsContainer");
+  container.innerHTML = "";
+
+  if (!progressButton) {
+    progressButton = document.createElement("button");
+    progressButton.type = "button";
+    progressButton.className = "start-btn";
+    progressButton.textContent = "View Progress";
+    progressButton.addEventListener("click", showProgress);
+    testArea.insertBefore(progressButton, container);
+  }
+
+  const item = questions[currentQuestion];
+  const box = document.createElement("div");
+  box.style.cssText =
+    "background:#fff;border:1px solid #d7e5eb;border-radius:12px;padding:25px;margin-bottom:20px";
+
+  const title = document.createElement("h3");
+  title.textContent = "Question " + (currentQuestion + 1) + " / 100";
+  title.style.color = "#082c5c";
+  box.appendChild(title);
+
+  const q = document.createElement("p");
+  q.textContent = item.question;
+  q.style.cssText = "font-weight:700;font-size:17px";
+  box.appendChild(q);
+
+  item.options.forEach(function(option, optionIndex) {
+    const label = document.createElement("label");
+    label.style.cssText = "display:block;padding:10px;cursor:pointer";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "currentQuestion";
+    radio.value = String.fromCharCode(65 + optionIndex);
+
+    radio.addEventListener("change", function() {
+      userAnswers[currentQuestion] = radio.value;
+      saveAll();
+    });
+
+    if (userAnswers[currentQuestion] === radio.value) radio.checked = true;
+
+    label.appendChild(radio);
+    label.appendChild(
+      document.createTextNode(
+        " " + String.fromCharCode(65 + optionIndex) + ") " + option
+      )
+    );
+    box.appendChild(label);
   });
 
+  const buttons = document.createElement("div");
+  buttons.style.cssText =
+    "display:flex;flex-direction:column;gap:12px;margin-top:20px";
 
+  const row = document.createElement("div");
+  row.style.cssText = "display:flex;gap:12px;width:100%";
 
-});
- 
+  const prev = document.createElement("button");
+  prev.type = "button";
+  prev.className = "start-btn";
+  prev.textContent = "← Previous Question";
+  prev.style.cssText = "width:50%;margin-top:0";
+  prev.disabled = currentQuestion === 0;
+  prev.addEventListener("click", function() {
+    if (currentQuestion > 0) {
+      currentQuestion--;
+      saveAll();
+      showQuestion();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+  });
+
+  const next = document.createElement("button");
+  next.type = "button";
+  next.className = "start-btn";
+  next.textContent = "Next Question →";
+  next.style.cssText = "width:50%;margin-top:0";
+  next.addEventListener("click", function() {
+    const selected =
+      document.querySelector('input[name="currentQuestion"]:checked');
+    if (selected) userAnswers[currentQuestion] = selected.value;
+
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      saveAll();
+      showQuestion();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+  });
+
+  row.appendChild(prev);
+  row.appendChild(next);
+
+  const finish = document.createElement("button");
+  finish.type = "button";
+  finish.className = "start-btn";
+  finish.textContent = "✓ Finish Assessment";
+  finish.style.cssText = "width:100%;margin-top:0";
+  finish.addEventListener("click", function() {
+    finishAssessment(false);
+  });
+
+  buttons.appendChild(row);
+  buttons.appendChild(finish);
+  box.appendChild(buttons);
+  container.appendChild(box);
+}
+
+// Restore everything after Ctrl+R / browser refresh.
+(function restoreSession() {
+  loadAll();
+
+  try {
+    verifiedAccess = JSON.parse(localStorage.getItem(ACCESS_KEY) || "null");
+  } catch (e) {
+    verifiedAccess = null;
+  }
+
+  if (!verifiedAccess) {
+    accessGate.style.display = "block";
+    candidateForm.style.display = "none";
+    testArea.style.display = "none";
+    return;
+  }
+
+  fillCandidate();
+
+  if (
+    localStorage.getItem(STARTED_KEY) === "true" &&
+    localStorage.getItem(TIMER_KEY)
+  ) {
+    showTest();
+    startTimer();
+    showQuestion();
+  } else {
+    accessGate.style.display = "none";
+    candidateForm.style.display = "block";
+    testArea.style.display = "none";
+  }
+})();
+
 </script>
 </body>
 </html>
