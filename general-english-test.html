@@ -847,7 +847,7 @@ verifyAccessBtn.addEventListener("click", async function () {
     }
 
     verifiedAccess = data.access;
-    localStorage.setItem(ACCESS_KEY, JSON.stringify(verifiedAccess));
+   sessionStorage.setItem(ACCESS_KEY, JSON.stringify(verifiedAccess));
 
     candidate = {
       name: verifiedAccess.candidateName || "",
@@ -981,12 +981,14 @@ function finishAssessment(forceFinish) {
   if (!forceFinish) {
     const selected =
       document.querySelector('input[name="currentQuestion"]:checked');
+
     if (selected) {
       userAnswers[currentQuestion] = selected.value;
       saveAll();
     }
 
     const attempted = userAnswers.filter(a => a !== undefined).length;
+
     if (!confirm(
       "Are you sure you want to finish the assessment?\n\n" +
       "Answered questions: " + attempted
@@ -1000,6 +1002,7 @@ function finishAssessment(forceFinish) {
   }, 0);
 
   let estimatedLevel = "A1";
+
   if (score >= 93) estimatedLevel = "C2";
   else if (score >= 86) estimatedLevel = "C1.2";
   else if (score >= 76) estimatedLevel = "C1.1";
@@ -1009,6 +1012,25 @@ function finishAssessment(forceFinish) {
   else if (score >= 26) estimatedLevel = "B1.1";
   else if (score >= 16) estimatedLevel = "A2.2";
   else if (score >= 8) estimatedLevel = "A2.1";
+
+  /*
+   * IMPORTANT:
+   * Clear the local/session assessment state BEFORE sending
+   * the result to the server.
+   *
+   * This prevents the candidate from reopening the old assessment
+   * by refreshing the page while the result is being submitted.
+   */
+
+  clearInterval(timerInterval);
+  timerInterval = null;
+
+  localStorage.removeItem(TIMER_KEY);
+  localStorage.removeItem(STARTED_KEY);
+  localStorage.removeItem(PROGRESS_KEY);
+  localStorage.removeItem(CANDIDATE_KEY);
+
+  sessionStorage.removeItem(ACCESS_KEY);
 
   fetch("/api/save-result", {
     method: "POST",
@@ -1032,29 +1054,42 @@ function finishAssessment(forceFinish) {
   .then(function(data) {
     console.log("Result saved:", data);
 
-    clearInterval(timerInterval);
-    localStorage.removeItem(TIMER_KEY);
-    localStorage.removeItem(STARTED_KEY);
-    localStorage.removeItem(PROGRESS_KEY);
-    localStorage.removeItem(CANDIDATE_KEY);
-    localStorage.removeItem(ACCESS_KEY);
-
     document.getElementById("timer").style.display = "none";
-    document.getElementById("testArea").querySelector(".test-info").style.display = "none";
-    if (progressButton) progressButton.style.display = "none";
+
+    const testInfo =
+      document.getElementById("testArea").querySelector(".test-info");
+
+    if (testInfo) testInfo.style.display = "none";
+
+    if (progressButton) {
+      progressButton.style.display = "none";
+    }
 
     document.getElementById("questionsContainer").innerHTML = `
-      <div style="background:#fff;border:1px solid #d7e5eb;border-radius:16px;padding:40px;text-align:center">
+      <div style="
+        background:#fff;
+        border:1px solid #d7e5eb;
+        border-radius:16px;
+        padding:40px;
+        text-align:center
+      ">
         <h2 style="color:#082c5c">Assessment Completed</h2>
-        <p style="font-size:18px;margin-top:20px">Thank you for completing the assessment.</p>
-        <p style="margin-top:10px">Your assessment has been successfully submitted.</p>
+        <p style="font-size:18px;margin-top:20px">
+          Thank you for completing the assessment.
+        </p>
+        <p style="margin-top:10px">
+          Your assessment has been successfully submitted.
+        </p>
       </div>
     `;
   })
   .catch(function(error) {
     console.error("Result save error:", error);
-    finished = false;
-    alert("There was an error submitting the assessment.");
+
+    alert(
+      "There was an error submitting the assessment. " +
+      "Please contact Lingua-Metrics."
+    );
   });
 }
 
@@ -1174,7 +1209,7 @@ function showQuestion() {
   loadAll();
 
   try {
-    verifiedAccess = JSON.parse(localStorage.getItem(ACCESS_KEY) || "null");
+    verifiedAccess = JSON.parse(sessionStorage.getItem(ACCESS_KEY) || "null");
   } catch (e) {
     verifiedAccess = null;
   }
