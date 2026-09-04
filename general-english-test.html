@@ -853,7 +853,9 @@ localStorage.removeItem(STARTED_KEY);
 localStorage.removeItem(TIMER_KEY);
 localStorage.removeItem(PROGRESS_KEY);
 localStorage.removeItem(CANDIDATE_KEY);
-
+currentQuestion = 0;
+userAnswers = [];
+finished = false;
 sessionStorage.setItem(ACCESS_KEY, JSON.stringify(verifiedAccess));
 
 candidate = {
