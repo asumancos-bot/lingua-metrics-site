@@ -1171,7 +1171,7 @@ function showQuestion() {
       currentQuestion--;
       saveAll();
       showQuestion();
-      window.scrollTo({top:0, behavior:"smooth"});
+      container.scrollIntoView({ block: "start", behavior: "auto" });
     }
   });
 
@@ -1189,7 +1189,7 @@ function showQuestion() {
       currentQuestion++;
       saveAll();
       showQuestion();
-      window.scrollTo({top:0, behavior:"smooth"});
+      container.scrollIntoView({ block: "start", behavior: "auto" });
     }
   });
 
