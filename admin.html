@@ -437,7 +437,47 @@ pre {
         padding: 20px;
     }
 }
+/* COLLAPSIBLE ADMIN LISTS */
 
+.collapsible-section {
+    margin-top: 20px;
+}
+
+.collapsible-section summary {
+    list-style: none;
+    cursor: pointer;
+    background: #082c5c;
+    color: white;
+    padding: 15px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.collapsible-section summary::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-section summary::after {
+    content: "▼";
+    float: right;
+}
+
+.collapsible-section[open] summary::after {
+    content: "▲";
+}
+
+.collapsible-section .hide-label {
+    display: none;
+}
+
+.collapsible-section[open] .show-label {
+    display: none;
+}
+
+.collapsible-section[open] .hide-label {
+    display: inline;
+}
 </style>
 </head>
 
@@ -638,6 +678,17 @@ pre {
 
     </div>
 
+    <details class="collapsible-section">
+    <summary>
+        <span class="show-label">
+            Access Code Listesini Göster
+            (<span id="accessCodeListCount">0</span>)
+        </span>
+        <span class="hide-label">
+            Access Code Listesini Gizle
+        </span>
+    </summary>
+
     <div class="access-table-wrapper">
 
         <table class="access-table">
@@ -660,10 +711,19 @@ pre {
         </table>
 
     </div>
-
+</details>
 </div>
     <!-- FILTERS -->
-
+<details class="collapsible-section">
+    <summary>
+        <span class="show-label">
+            Sınav Sonuçlarını Göster
+            (<span id="resultsListCount">0</span>)
+        </span>
+        <span class="hide-label">
+            Sınav Sonuçlarını Gizle
+        </span>
+    </summary>
     <div class="filters">
 
         <input
@@ -775,7 +835,7 @@ pre {
         </table>
 
     </div>
-
+</details>
 </div>
 
 </div>
@@ -1002,9 +1062,14 @@ function updateStatistics(results) {
     document.getElementById("shownResults")
         .textContent = results.length;
 
+
+const resultsListCount =
+    document.getElementById("resultsListCount");
+
+if (resultsListCount) {
+    resultsListCount.textContent = allResults.length;
 }
-
-
+}
 
 /* FILTER */
 
@@ -1652,7 +1717,12 @@ function renderAccessCodes() {
         );
 
     if (!body) return;
+const accessCodeListCount =
+    document.getElementById("accessCodeListCount");
 
+if (accessCodeListCount) {
+    accessCodeListCount.textContent = accessCodes.length;
+}
     body.innerHTML = "";
 
     if (!accessCodes.length) {
