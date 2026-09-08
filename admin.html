@@ -313,7 +313,24 @@ tr:hover {
     padding: 8px 12px;
     font-size: 12px;
 }
+.delete-btn {
+    background: #b42318;
+    color: white;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
 
+.delete-btn:hover {
+    background: #8f1b13;
+}
+
+.delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 /* MODAL */
 
 .modal {
@@ -454,7 +471,7 @@ pre {
     font-size: 16px;
 }
 
-.collapsible-section summary::-webkit-details-marker {
+.collapsible-section summary::-webkit--marker {
     display: none;
 }
 
@@ -678,7 +695,7 @@ pre {
 
     </div>
 
-    <details class="collapsible-section">
+    < class="collapsible-section">
     <summary>
         <span class="show-label">
             Access Code Listesini Göster
@@ -702,6 +719,7 @@ pre {
                     <th>Email</th>
                     <th>Expires</th>
                     <th>Status</th>
+                    <th>Delete</th>
                 </tr>
 
             </thead>
@@ -711,7 +729,7 @@ pre {
         </table>
 
     </div>
-</details>
+</>
 </div>
     <!-- FILTERS -->
 <details class="collapsible-section">
@@ -824,7 +842,9 @@ pre {
                     <th>
                         Details
                     </th>
-
+<th>
+    Delete
+</th>
                 </tr>
 
             </thead>
@@ -1184,7 +1204,7 @@ function renderResults(results) {
 
         body.innerHTML =
             '<tr>' +
-            '<td colspan="10" class="empty">' +
+            '<td colspan="11" class="empty">' +
             'No assessment results found.' +
             '</td>' +
             '</tr>';
@@ -1266,7 +1286,15 @@ function renderResults(results) {
                 </button>
 
             </td>
-
+<td>
+    <button
+        type="button"
+        class="delete-btn"
+        onclick="deleteAssessmentResult(${Number(result.id)})"
+    >
+        Delete
+    </button>
+</td>
         `;
 
 
@@ -1277,7 +1305,58 @@ function renderResults(results) {
 }
 
 
+async function deleteAssessmentResult(id) {
+    const result = allResults.find(
+        item => Number(item.id) === Number(id)
+    );
 
+    const candidateName =
+        result?.candidate_name || "this candidate";
+
+    const confirmed = window.confirm(
+        `${candidateName} adlı adayın sınav sonucu kalıcı olarak silinecek. Devam edilsin mi?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(
+            `/api/results?id=${encodeURIComponent(id)}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Authorization": authHeader
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message ||
+                "Assessment result could not be deleted."
+            );
+        }
+
+        await loadResults();
+
+        window.alert(
+            "Sınav sonucu başarıyla silindi."
+        );
+
+    } catch (error) {
+        console.error(
+            "DELETE RESULT ERROR:",
+            error
+        );
+
+        window.alert(
+            error.message ||
+            "Sınav sonucu silinemedi."
+        );
+    }
+}
 /* SHOW DETAILS */
 
 function showDetails(index) {
@@ -1523,7 +1602,7 @@ document.getElementById("detailContent").innerHTML = `
 
 /* CLOSE MODAL */
 
-function closeDetails() {
+function close() {
 
     document.getElementById("detailModal")
         .style.display = "none";
@@ -1538,7 +1617,7 @@ function closeModal(event) {
         document.getElementById("detailModal")
     ) {
 
-        closeDetails();
+        close();
 
     }
 
@@ -1729,7 +1808,7 @@ if (accessCodeListCount) {
 
         body.innerHTML = `
             <tr>
-                <td colspan="6" class="empty">
+                <td colspan="7" class="empty">
                     No access codes found.
                 </td>
             </tr>
@@ -1795,7 +1874,15 @@ if (accessCodeListCount) {
             <td class="${statusClass}">
                 ${status}
             </td>
-
+<td>
+    <button
+        type="button"
+        class="delete-btn"
+        onclick="deleteAccessCode(${Number(code.id)})"
+    >
+        Delete
+    </button>
+</td>
         `;
 
         body.appendChild(row);
@@ -1803,7 +1890,74 @@ if (accessCodeListCount) {
     });
 }
 
+async function deleteAccessCode(id) {
+    const code = accessCodes.find(
+        item => Number(item.id) === Number(id)
+    );
 
+    const accessCode =
+        code?.access_code || "Bu access code";
+
+    const confirmed = window.confirm(
+        `${accessCode} kalıcı olarak silinecek. Devam edilsin mi?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(
+            `/api/access-codes?id=${encodeURIComponent(id)}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Authorization": authHeader
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message ||
+                "Access code could not be deleted."
+            );
+        }
+
+        if (
+            code &&
+            lastCreatedAccessCode === code.access_code
+        ) {
+            lastCreatedAccessCode = "";
+
+            const resultBox =
+                document.getElementById(
+                    "accessCodeResult"
+                );
+
+            if (resultBox) {
+                resultBox.style.display = "none";
+            }
+        }
+
+        await loadAccessCodes();
+
+        window.alert(
+            "Access code başarıyla silindi."
+        );
+
+    } catch (error) {
+        console.error(
+            "DELETE ACCESS CODE ERROR:",
+            error
+        );
+
+        window.alert(
+            error.message ||
+            "Access code silinemedi."
+        );
+    }
+}
 async function copyAccessCode() {
 
     if (!lastCreatedAccessCode) {
