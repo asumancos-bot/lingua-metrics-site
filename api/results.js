@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     });
   }
 
-  if (req.method !== "GET") {
+ if (!["GET", "DELETE"].includes(req.method)) {
     return res.status(405).json({
       success: false,
       message: "Method Not Allowed",
@@ -46,6 +46,38 @@ export default async function handler(req, res) {
   }
 
   try {
+     if (req.method === "DELETE") {
+      const id = Number(req.query.id);
+
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid result ID.",
+        });
+      }
+
+      const deleted = await pool.query(
+        `
+        DELETE FROM assessment_results
+        WHERE id = $1
+        RETURNING id, candidate_name, email;
+        `,
+        [id]
+      );
+
+      if (!deleted.rows.length) {
+        return res.status(404).json({
+          success: false,
+          message: "Assessment result not found.",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Assessment result deleted successfully.",
+        deletedResult: deleted.rows[0],
+      });
+    }
 await pool.query(`
   ALTER TABLE assessment_results
   ADD COLUMN IF NOT EXISTS correct_answers JSONB;
