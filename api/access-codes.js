@@ -357,7 +357,38 @@ export default async function handler(req, res) {
         emailError,
       });
     }
+if (req.method === "DELETE") {
+      const id = Number(req.query.id);
 
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid access code ID.",
+        });
+      }
+
+      const result = await pool.query(
+        `
+        DELETE FROM assessment_access_codes
+        WHERE id = $1
+        RETURNING id, access_code;
+        `,
+        [id]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({
+          success: false,
+          message: "Access code not found.",
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Access code deleted successfully.",
+        deletedAccessCode: result.rows[0],
+      });
+    }
     return res.status(405).json({
       success: false,
       message: "Method Not Allowed.",
