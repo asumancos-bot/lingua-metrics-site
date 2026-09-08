@@ -471,7 +471,7 @@ pre {
     font-size: 16px;
 }
 
-.collapsible-section summary::-webkit--marker {
+.collapsible-section summary::-webkit-details-marker {
     display: none;
 }
 
@@ -695,7 +695,7 @@ pre {
 
     </div>
 
-    < class="collapsible-section">
+    <details class="collapsible-section">
     <summary>
         <span class="show-label">
             Access Code Listesini Göster
@@ -729,7 +729,7 @@ pre {
         </table>
 
     </div>
-</>
+</details>
 </div>
     <!-- FILTERS -->
 <details class="collapsible-section">
@@ -1602,7 +1602,7 @@ document.getElementById("detailContent").innerHTML = `
 
 /* CLOSE MODAL */
 
-function close() {
+function closeDetails() {
 
     document.getElementById("detailModal")
         .style.display = "none";
@@ -1617,7 +1617,7 @@ function closeModal(event) {
         document.getElementById("detailModal")
     ) {
 
-        close();
+        closeDetails();
 
     }
 
