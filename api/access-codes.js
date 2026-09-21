@@ -90,8 +90,10 @@ async function sendAssessmentEmail({
     throw new Error("RESEND_API_KEY is not configured.");
   }
 
-  const assessmentUrl =
-    "https://www.lingua-metrics.com/general-english-test.html";
+const assessmentUrl =
+  testName === "Business English Core Assessment"
+    ? "https://www.lingua-metrics.com/business-english-test.html"
+    : "https://www.lingua-metrics.com/general-english-test.html";
 
   const safeCandidateName = escapeHtml(
     candidateName || "Candidate"
