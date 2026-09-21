@@ -834,7 +834,10 @@ verifyAccessBtn.addEventListener("click", async function () {
     const response = await fetch("/api/verify-access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessCode: accessCode })
+     body: JSON.stringify({
+  accessCode: accessCode,
+  assessmentType: "general-english"
+})
     });
 
     const data = await response.json();
