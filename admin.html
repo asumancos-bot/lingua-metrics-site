@@ -662,7 +662,11 @@ pre {
             type="datetime-local"
             id="accessExpires"
         >
-
+<label for="assessmentType">Assessment</label>
+<select id="assessmentType">
+    <option value="general-english">General English Assessment</option>
+    <option value="business-english-core">Business English Core Assessment</option>
+</select>
         <button onclick="createAccessCode()">
             Create Access Code
         </button>
@@ -1684,7 +1688,8 @@ async function createAccessCode() {
 
     const expiresAt =
         document.getElementById("accessExpires").value;
-
+const assessmentType =
+    document.getElementById("assessmentType").value;
     const message =
         document.getElementById("accessMessage");
 
@@ -1719,13 +1724,14 @@ async function createAccessCode() {
                     "Authorization": authHeader
                 },
 
-                body: JSON.stringify({
-                    testName,
-                    organizationName,
-                    candidateName,
-                    candidateEmail,
-                    expiresAt
-                })
+               body: JSON.stringify({
+    testName,
+    organizationName,
+    candidateName,
+    candidateEmail,
+    expiresAt,
+    assessmentType
+})
             }
         );
 
