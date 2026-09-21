@@ -16,12 +16,31 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { accessCode } = req.body;
+    const { accessCode, assessmentType } = req.body || {};
 
     if (!accessCode) {
       return res.status(400).json({
         success: false,
         message: "Access code is required.",
+      });
+    }
+
+    if (!assessmentType) {
+      return res.status(400).json({
+        success: false,
+        message: "Assessment type is required.",
+      });
+    }
+
+    const allowedAssessmentTypes = [
+      "general-english",
+      "business-english-core",
+    ];
+
+    if (!allowedAssessmentTypes.includes(assessmentType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid assessment type.",
       });
     }
 
@@ -56,10 +75,34 @@ export default async function handler(req, res) {
     `);
 
     /*
-     * Atomically claim the access code.
+     * Keep assessment_type synchronized with test_name.
      *
-     * The code becomes USED at the moment access is
-     * successfully granted.
+     * This also fixes Business English codes created before
+     * assessment_type was stored correctly.
+     */
+    await pool.query(`
+      UPDATE assessment_access_codes
+      SET assessment_type =
+        CASE
+          WHEN test_name = 'Business English Core Assessment'
+            THEN 'business-english-core'
+          ELSE 'general-english'
+        END
+      WHERE
+        assessment_type IS NULL
+        OR assessment_type = ''
+        OR (
+          test_name = 'Business English Core Assessment'
+          AND assessment_type <> 'business-english-core'
+        );
+    `);
+
+    /*
+     * Atomically claim the code ONLY when it belongs
+     * to the assessment page requesting access.
+     *
+     * A code entered on the wrong assessment page
+     * will NOT be marked as used.
      */
     const claimResult = await pool.query(
       `
@@ -69,6 +112,7 @@ export default async function handler(req, res) {
         used_at = CURRENT_TIMESTAMP
       WHERE
         access_code = $1
+        AND assessment_type = $2
         AND is_used = FALSE
         AND (
           expires_at IS NULL
@@ -86,7 +130,7 @@ export default async function handler(req, res) {
         used_at,
         assessment_type;
       `,
-      [normalizedCode]
+      [normalizedCode, assessmentType]
     );
 
     /*
@@ -104,20 +148,20 @@ export default async function handler(req, res) {
           organizationName: access.organization_name,
           candidateName: access.candidate_name,
           candidateEmail: access.candidate_email,
-          assessmentType:
-            access.assessment_type || "general-english",
+          assessmentType: access.assessment_type,
         },
       });
     }
 
     /*
      * If the atomic UPDATE did not claim the code,
-     * determine why.
+     * determine why WITHOUT consuming the code.
      */
     const existingResult = await pool.query(
       `
       SELECT
         id,
+        test_name,
         is_used,
         expires_at,
         assessment_type
@@ -139,6 +183,21 @@ export default async function handler(req, res) {
     }
 
     const existing = existingResult.rows[0];
+
+    /*
+     * Code belongs to another assessment.
+     *
+     * IMPORTANT:
+     * It has NOT been marked as used.
+     */
+    if (existing.assessment_type !== assessmentType) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "This access code is not valid for this assessment.",
+        correctAssessmentType: existing.assessment_type,
+      });
+    }
 
     /*
      * Code was already used.
