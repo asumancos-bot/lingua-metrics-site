@@ -90,135 +90,443 @@ async function sendAssessmentEmail({
     throw new Error("RESEND_API_KEY is not configured.");
   }
 
-const assessmentUrl =
-  testName === "Business English Core Assessment"
+  const isBusinessEnglish =
+    testName === "Business English Core Assessment";
+
+  const assessmentUrl = isBusinessEnglish
     ? "https://www.lingua-metrics.com/business-english-test.html"
     : "https://www.lingua-metrics.com/general-english-test.html";
+
+  const assessmentDescription = isBusinessEnglish
+    ? `This assessment evaluates your Business English proficiency across
+       <strong>Grammar, Use of English and Business Vocabulary</strong>,
+       aligned with the <strong>CEFR A1–C1 framework</strong>.`
+    : `This assessment evaluates your overall English proficiency and
+       provides an estimated level aligned with the
+       <strong>CEFR A1–C1 framework</strong>.`;
 
   const safeCandidateName = escapeHtml(
     candidateName || "Candidate"
   );
+
   const safeTestName = escapeHtml(
     testName || "General English Assessment"
   );
+
   const safeOrganizationName = escapeHtml(
     organizationName || ""
   );
+
   const safeAccessCode = escapeHtml(accessCode);
+
   const safeExpiryDate = escapeHtml(
     formatExpiryDate(expiresAt)
   );
 
+  const organizationIntroduction = safeOrganizationName
+    ? `You have been invited by <strong>${safeOrganizationName}</strong>
+       to complete the <strong>${safeTestName}</strong>.`
+    : `You have been invited to complete the
+       <strong>${safeTestName}</strong>.`;
+
   const organizationRow = safeOrganizationName
     ? `
       <tr>
-        <td style="padding:8px 0;color:#64748b;">Organization</td>
-        <td style="padding:8px 0;text-align:right;color:#0f172a;">
+        <td style="padding:9px 0;color:#64748b;">
+          Organization
+        </td>
+        <td style="padding:9px 0;text-align:right;color:#0f172a;font-weight:600;">
           ${safeOrganizationName}
         </td>
       </tr>
     `
     : "";
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from:
-        "Lingua-Metrics Assessment Team <info@lingua-metrics.com>",
-      to: [candidateEmail.trim()],
-      reply_to: "asumankarnak@lingua-metrics.com",
-      subject: `${testName || "General English Assessment"} – Access Code`,
-      html: `
-        <!doctype html>
-        <html lang="en">
-          <body style="margin:0;background:#f1f5f9;font-family:Arial,sans-serif;color:#0f172a;">
-            <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
-              <div style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
-                <div style="background:#0f172a;padding:28px 32px;">
-                  <h1 style="margin:0;color:#ffffff;font-size:24px;">
-                    Lingua-Metrics
-                  </h1>
-                  <p style="margin:8px 0 0;color:#67e8f9;font-size:14px;">
-                    Measure. Develop. Perform.
-                  </p>
-                </div>
+  const response = await fetch(
+    "https://api.resend.com/emails",
+    {
+      method: "POST",
 
-                <div style="padding:32px;">
-                  <p style="font-size:17px;margin-top:0;">
-                    Dear ${safeCandidateName},
-                  </p>
+      headers: {
+        Authorization:
+          `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
 
-                  <p style="line-height:1.7;color:#334155;">
-                    You have been invited to complete the
-                    <strong>${safeTestName}</strong>.
-                    Use the access code below to begin your assessment.
-                  </p>
+      body: JSON.stringify({
+        from:
+          "Lingua-Metrics Assessment Team <info@lingua-metrics.com>",
 
-                  <div style="margin:28px 0;padding:24px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:12px;text-align:center;">
-                    <div style="font-size:13px;color:#0e7490;text-transform:uppercase;letter-spacing:1px;">
-                      Access Code
-                    </div>
-                    <div style="margin-top:10px;font-size:28px;font-weight:700;letter-spacing:2px;color:#0f172a;">
-                      ${safeAccessCode}
-                    </div>
-                  </div>
+        to: [candidateEmail.trim()],
 
-                  <table style="width:100%;border-collapse:collapse;font-size:14px;">
-                    <tr>
-                      <td style="padding:8px 0;color:#64748b;">Assessment</td>
-                      <td style="padding:8px 0;text-align:right;color:#0f172a;">
-                        ${safeTestName}
-                      </td>
-                    </tr>
-                    ${organizationRow}
-                    <tr>
-                      <td style="padding:8px 0;color:#64748b;">Valid until</td>
-                      <td style="padding:8px 0;text-align:right;color:#0f172a;">
-                        ${safeExpiryDate}
-                      </td>
-                    </tr>
-                  </table>
+        reply_to:
+          "asumankarnak@lingua-metrics.com",
 
-                  <div style="text-align:center;margin-top:30px;">
-                    <a
-                      href="${assessmentUrl}"
-                      style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:700;"
-                    >
-                      Start Assessment
-                    </a>
-                  </div>
+        subject:
+          `Lingua-Metrics | ${
+            testName || "General English Assessment"
+          } – Your Access Details`,
 
-                  <p style="margin:28px 0 0;font-size:13px;line-height:1.6;color:#64748b;">
-                    This access code is personal and can only be used once.
-                    Please do not share it with anyone.
-                  </p>
-                </div>
-              </div>
+        html: `
+<!doctype html>
 
-              <p style="text-align:center;color:#94a3b8;font-size:12px;margin:18px 0 0;">
-                © ${new Date().getFullYear()} Lingua-Metrics
-              </p>
-            </div>
-          </body>
-        </html>
-      `,
-    }),
-  });
+<html lang="en">
 
-  const data = await response.json().catch(() => ({}));
+<body
+  style="
+    margin:0;
+    padding:0;
+    background:#f1f5f9;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#0f172a;
+  "
+>
+
+<div
+  style="
+    max-width:640px;
+    margin:0 auto;
+    padding:32px 16px;
+  "
+>
+
+  <div
+    style="
+      background:#ffffff;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #e2e8f0;
+    "
+  >
+
+    <div
+      style="
+        background:#0f172a;
+        padding:30px 32px;
+        text-align:center;
+      "
+    >
+
+      <div
+        style="
+          color:#ffffff;
+          font-size:27px;
+          font-weight:700;
+          letter-spacing:1px;
+        "
+      >
+        LINGUA-METRICS
+      </div>
+
+      <div
+        style="
+          margin-top:8px;
+          color:#67e8f9;
+          font-size:14px;
+          letter-spacing:.5px;
+        "
+      >
+        Measure. Develop. Perform.
+      </div>
+
+    </div>
+
+
+    <div style="padding:34px 32px;">
+
+      <p
+        style="
+          font-size:17px;
+          margin:0 0 22px;
+        "
+      >
+        Dear ${safeCandidateName},
+      </p>
+
+
+      <p
+        style="
+          line-height:1.7;
+          color:#334155;
+          margin:0 0 16px;
+        "
+      >
+        ${organizationIntroduction}
+      </p>
+
+
+      <p
+        style="
+          line-height:1.7;
+          color:#334155;
+          margin:0 0 26px;
+        "
+      >
+        ${assessmentDescription}
+      </p>
+
+
+      <div
+        style="
+          margin:28px 0;
+          padding:25px;
+          background:#ecfeff;
+          border:1px solid #a5f3fc;
+          border-radius:12px;
+          text-align:center;
+        "
+      >
+
+        <div
+          style="
+            font-size:12px;
+            color:#0e7490;
+            text-transform:uppercase;
+            letter-spacing:1.5px;
+            font-weight:700;
+          "
+        >
+          Your Access Code
+        </div>
+
+        <div
+          style="
+            margin-top:11px;
+            font-size:28px;
+            font-weight:700;
+            letter-spacing:2px;
+            color:#0f172a;
+          "
+        >
+          ${safeAccessCode}
+        </div>
+
+      </div>
+
+
+      <table
+        style="
+          width:100%;
+          border-collapse:collapse;
+          font-size:14px;
+          margin-top:6px;
+        "
+      >
+
+        <tr>
+
+          <td
+            style="
+              padding:9px 0;
+              color:#64748b;
+            "
+          >
+            Assessment
+          </td>
+
+          <td
+            style="
+              padding:9px 0;
+              text-align:right;
+              color:#0f172a;
+              font-weight:600;
+            "
+          >
+            ${safeTestName}
+          </td>
+
+        </tr>
+
+
+        ${organizationRow}
+
+
+        <tr>
+
+          <td
+            style="
+              padding:9px 0;
+              color:#64748b;
+            "
+          >
+            Valid until
+          </td>
+
+          <td
+            style="
+              padding:9px 0;
+              text-align:right;
+              color:#0f172a;
+              font-weight:600;
+            "
+          >
+            ${safeExpiryDate}
+          </td>
+
+        </tr>
+
+      </table>
+
+
+      <div
+        style="
+          text-align:center;
+          margin:34px 0;
+        "
+      >
+
+        <a
+          href="${assessmentUrl}"
+          style="
+            display:inline-block;
+            background:#0f172a;
+            color:#ffffff;
+            text-decoration:none;
+            padding:15px 30px;
+            border-radius:8px;
+            font-weight:700;
+            font-size:15px;
+          "
+        >
+          Start Assessment →
+        </a>
+
+      </div>
+
+
+      <div
+        style="
+          margin-top:32px;
+          padding:22px;
+          background:#f8fafc;
+          border-radius:10px;
+          border:1px solid #e2e8f0;
+        "
+      >
+
+        <div
+          style="
+            font-size:15px;
+            font-weight:700;
+            color:#0f172a;
+            margin-bottom:12px;
+          "
+        >
+          Before you begin
+        </div>
+
+
+        <ul
+          style="
+            margin:0;
+            padding-left:20px;
+            color:#475569;
+            line-height:1.8;
+            font-size:14px;
+          "
+        >
+
+          <li>
+            Please complete the assessment independently.
+          </li>
+
+          <li>
+            Your access code is personal and can only be used once.
+          </li>
+
+          <li>
+            Make sure you have enough uninterrupted time
+            to complete the assessment.
+          </li>
+
+          <li>
+            Do not close or refresh the assessment page
+            once you have started.
+          </li>
+
+        </ul>
+
+      </div>
+
+
+      <p
+        style="
+          margin:26px 0 0;
+          font-size:14px;
+          line-height:1.7;
+          color:#475569;
+        "
+      >
+        Your assessment results will be recorded securely
+        and made available to the authorized organization.
+      </p>
+
+
+      <p
+        style="
+          margin:28px 0 0;
+          line-height:1.7;
+          color:#334155;
+        "
+      >
+        Kind regards,<br>
+
+        <strong>
+          Lingua-Metrics Assessment Team
+        </strong>
+
+        <br>
+
+        <span
+          style="
+            color:#64748b;
+            font-size:13px;
+          "
+        >
+          Measure. Develop. Perform.
+        </span>
+
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <p
+    style="
+      text-align:center;
+      color:#94a3b8;
+      font-size:12px;
+      margin:18px 0 0;
+    "
+  >
+    © ${new Date().getFullYear()} Lingua-Metrics
+  </p>
+
+</div>
+
+</body>
+
+</html>
+        `,
+      }),
+    }
+  );
+
+  const data =
+    await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(
-      data.message || "Resend could not send the email."
+      data.message ||
+        "Resend could not send the email."
     );
   }
 
   return data;
 }
+
 
 export default async function handler(req, res) {
   if (!checkAuth(req)) {
@@ -267,6 +575,7 @@ export default async function handler(req, res) {
       });
     }
 
+
     if (req.method === "POST") {
       const {
         testName,
@@ -283,11 +592,14 @@ export default async function handler(req, res) {
 
       if (
         normalizedEmail &&
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+          normalizedEmail
+        )
       ) {
         return res.status(400).json({
           success: false,
-          message: "Please enter a valid candidate email address.",
+          message:
+            "Please enter a valid candidate email address.",
         });
       }
 
@@ -303,7 +615,9 @@ export default async function handler(req, res) {
           candidate_email,
           expires_at
         )
+
         VALUES ($1, $2, $3, $4, $5, $6)
+
         RETURNING
           id,
           access_code,
@@ -317,7 +631,8 @@ export default async function handler(req, res) {
         `,
         [
           accessCode,
-          testName || "General English Assessment",
+          testName ||
+            "General English Assessment",
           organizationName || null,
           candidateName || null,
           normalizedEmail || null,
@@ -325,7 +640,9 @@ export default async function handler(req, res) {
         ]
       );
 
-      const createdAccessCode = result.rows[0];
+      const createdAccessCode =
+        result.rows[0];
+
       let emailSent = false;
       let emailError = null;
 
@@ -342,66 +659,95 @@ export default async function handler(req, res) {
 
           emailSent = true;
         } catch (error) {
-          console.error("ASSESSMENT EMAIL ERROR:", error);
+          console.error(
+            "ASSESSMENT EMAIL ERROR:",
+            error
+          );
+
           emailError = error.message;
         }
       }
 
       return res.status(201).json({
         success: true,
+
         message: normalizedEmail
           ? emailSent
             ? "Access code created and emailed successfully."
             : "Access code created, but the email could not be sent."
           : "Access code created successfully.",
-        accessCode: createdAccessCode,
+
+        accessCode:
+          createdAccessCode,
+
         emailSent,
+
         emailError,
       });
     }
-if (req.method === "DELETE") {
-      const id = Number(req.query.id);
 
-      if (!Number.isInteger(id) || id <= 0) {
+
+    if (req.method === "DELETE") {
+      const id =
+        Number(req.query.id);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
         return res.status(400).json({
           success: false,
-          message: "Invalid access code ID.",
+          message:
+            "Invalid access code ID.",
         });
       }
 
-      const result = await pool.query(
-        `
-        DELETE FROM assessment_access_codes
-        WHERE id = $1
-        RETURNING id, access_code;
-        `,
-        [id]
-      );
+      const result =
+        await pool.query(
+          `
+          DELETE FROM assessment_access_codes
+          WHERE id = $1
+          RETURNING id, access_code;
+          `,
+          [id]
+        );
 
       if (!result.rows.length) {
         return res.status(404).json({
           success: false,
-          message: "Access code not found.",
+          message:
+            "Access code not found.",
         });
       }
 
       return res.status(200).json({
         success: true,
-        message: "Access code deleted successfully.",
-        deletedAccessCode: result.rows[0],
+        message:
+          "Access code deleted successfully.",
+        deletedAccessCode:
+          result.rows[0],
       });
     }
+
+
     return res.status(405).json({
       success: false,
-      message: "Method Not Allowed.",
+      message:
+        "Method Not Allowed.",
     });
+
   } catch (error) {
-    console.error("ACCESS CODES ERROR:", error);
+    console.error(
+      "ACCESS CODES ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Could not process access code request.",
-      error: error.message,
+      message:
+        "Could not process access code request.",
+      error:
+        error.message,
     });
   }
 }
