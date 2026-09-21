@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Business English Core Assessment | Lingua-Metrics</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="stylesheet" href="assets/styles.css">
+
+  <style>
+    .test-page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 50px 20px;
+    }
+
+    .test-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .test-header img {
+      max-width: 180px;
+      margin-bottom: 20px;
+    }
+
+    .test-header h1 {
+      color: #082c5c;
+      margin-bottom: 10px;
+    }
+
+    .test-info {
+      background: #f4f9fb;
+      border: 1px solid #d7e5eb;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    .candidate-form label {
+      display: block;
+      font-weight: 700;
+      margin-top: 15px;
+      margin-bottom: 6px;
+    }
+
+    .candidate-form input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #ccd8df;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      margin-top: 25px;
+      padding: 15px;
+      border: 0;
+      border-radius: 8px;
+      background: #082c5c;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .start-btn:disabled {
+      opacity: 0.55;
+      cursor: default;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="test-page">
+
+  <div class="test-header">
+    <img src="assets/logo.png" alt="Lingua-Metrics">
+    <h1>Business English Core Assessment</h1>
+    <p>Lingua-Metrics Online Assessment Platform</p>
+  </div>
+
+  <div id="accessGate" class="candidate-form">
+
+    <h2>Assessment Access</h2>
+
+    <p>Please enter the access code sent to you by email.</p>
+
+    <input
+      type="text"
+      id="accessCode"
+      placeholder="Enter your access code"
+      autocomplete="off"
+    >
+
+    <button type="button" id="verifyAccessBtn" class="start-btn">
+      Verify & Continue
+    </button>
+
+    <p id="accessMessage"></p>
+
+  </div>
+
+  <div class="candidate-form" id="candidateForm" style="display:none;">
+
+    <div class="test-info">
+      <strong>Business English Core Assessment</strong>
+      <p>
+        60 questions • A1–C1 • 45 minutes
+      </p>
+      <p>
+        This assessment evaluates Grammar, Use of English and
+        Business Vocabulary.
+      </p>
+    </div>
+
+    <label>Full Name</label>
+    <input type="text" id="candidateName" required>
+
+    <label>Company</label>
+    <input type="text" id="candidateCompany">
+
+    <label>Email</label>
+    <input type="email" id="candidateEmail" required>
+
+    <button type="button" class="start-btn" id="startTest">
+      Start Assessment
+    </button>
+
+  </div>
+
+</div>
+
+<div id="testArea" style="display:none;" class="test-page">
+
+  <p id="candidateInfo"></p>
+
+  <div class="test-info">
+    <strong>Assessment Instructions</strong>
+
+    <p>
+      <strong>Your assessment is now active.</strong>
+      Please complete the assessment independently.
+      Read each question carefully and select the best answer.
+    </p>
+
+    <p>
+      You have <strong>45 minutes</strong> to complete
+      <strong>60 questions</strong>.
+    </p>
+  </div>
+
+  <div
+    id="timer"
+    style="
+      text-align:center;
+      font-size:20px;
+      font-weight:700;
+      color:#082c5c;
+      margin:20px 0;
+    "
+  >
+    Time Remaining: 45:00
+  </div>
+
+  <div id="questionsContainer"></div>
+
+</div>
+
+<script>
+document.getElementById("candidateName").addEventListener("input", function () {
+  this.value = this.value.toLocaleUpperCase("tr-TR");
+});
+
+document.getElementById("candidateCompany").addEventListener("input", function () {
+  this.value = this.value.toLocaleUpperCase("tr-TR");
+});
+
+document.getElementById("candidateEmail").addEventListener("input", function () {
+  this.value = this.value.toUpperCase();
+});
+
+
+/* =========================================================
+   BUSINESS ENGLISH CORE — 60 QUESTIONS
+   ========================================================= */
+
+const questions = [
+
+  /* ===================== A1 ===================== */
+
+  {
+    level: "A1",
+    question: "Our sales manager _____ client emails every morning.",
+    options: ["check", "checks", "is checking", "checked"],
+    answer: "B"
+  },
+
+  {
+    level: "A1",
+    question: "The finance team usually _____ the monthly report for errors before sending it to the director.",
+    options: ["checks", "receives", "prints", "discusses"],
+    answer: "A"
+  },
+
+  {
+    level: "A1",
+    question: "We _____ the updated price list to the client yesterday.",
+    options: ["send", "have sent", "sent", "were sending"],
+    answer: "C"
+  },
+
+  {
+    level: "A1",
+    question: "_____ you attend the meeting at 10 a.m. tomorrow?",
+    options: ["Do", "Have", "Can", "Are"],
+    answer: "C"
+  },
+
+  {
+    level: "A1",
+    question: "Please _____ the document to your email before sending it.",
+    options: ["attach", "attend", "deliver", "connect"],
+    answer: "A"
+  },
+
+
+  /* ===================== A2 ===================== */
+
+  {
+    level: "A2",
+    question: "I _____ the revised proposal to the client.",
+    options: ["have just sent", "just sent", "am sending", "sent"],
+    answer: "A"
+  },
+
+  {
+    level: "A2",
+    question: "The HR team _____ the new employees on Monday morning. Everything has already been arranged.",
+    options: ["meets", "met", "is meeting", "has met"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "Sales figures this month are _____ than last month's.",
+    options: ["high", "the highest", "higher", "as high"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "All team members _____ submit their weekly reports by Friday. It is company policy.",
+    options: ["might", "have to", "could", "would"],
+    answer: "B"
+  },
+
+  {
+    level: "A2",
+    question: "The company _____ its first international office in 2024.",
+    options: ["has opened", "was opening", "opened", "would open"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "We can't confirm the figures yet because we _____ the budget at the moment.",
+    options: ["review", "reviewed", "have reviewed", "are reviewing"],
+    answer: "D"
+  },
+
+  {
+    level: "A2",
+    question: "Thank you _____ your prompt response to our enquiry.",
+    options: ["about", "for", "of", "with"],
+    answer: "B"
+  },
+
+  {
+    level: "A2",
+    question: "The company didn't make _____ profit during the first quarter.",
+    options: ["many", "a few", "much", "several"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "If you need technical assistance, please _____ the IT department.",
+    options: ["contact", "call", "notify", "email"],
+    answer: "A"
+  },
+
+  {
+    level: "A2",
+    question: "Customer satisfaction _____ significantly since we introduced the new support system.",
+    options: ["improved", "improves", "has improved", "is improving"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "We plan _____ the new booking system next month.",
+    options: ["launching", "to launch", "for launching", "on launching"],
+    answer: "B"
+  },
+
+  {
+    level: "A2",
+    question: "While the company _____ customers, its main competitor was growing rapidly.",
+    options: ["lost", "has lost", "was losing", "is losing"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "_____ you please send me the latest version of the contract?",
+    options: ["Could", "Must", "Shall", "Need"],
+    answer: "A"
+  },
+
+  {
+    level: "A2",
+    question: "We need to _____ a decision before the end of today's meeting.",
+    options: ["take", "reach", "make", "discuss"],
+    answer: "C"
+  },
+
+  {
+    level: "A2",
+    question: "An _____ is a document requesting payment for goods or services.",
+    options: ["agenda", "invoice", "budget", "target"],
+    answer: "B"
+  },
+
+
+  /* ===================== B1 ===================== */
+
+  {
+    level: "B1",
+    question: "We _____ with this supplier for more than five years.",
+    options: ["work", "are working", "have been working", "worked"],
+    answer: "C"
+  },
+
+  {
+    level: "B1",
+    question: "The final report _____ to all clients by Friday afternoon.",
+    options: ["is commuted", "will be sent", "will arrive", "will be ready"],
+    answer: "B"
+  },
+
+  {
+    level: "B1",
+    question: "The finance director said that the department _____ its annual target ahead of schedule.",
+    options: ["is being achieved", "has achieved", "had achieved", "will achieve"],
+    answer: "C"
+  },
+
+  {
+    level: "B1",
+    question: "The consultant _____ prepared the market analysis will present the findings tomorrow.",
+    options: ["which", "whose", "whom", "who"],
+    answer: "D"
+  },
+
+  {
+    level: "B1",
+    question: "Operating costs _____ by 8% during the previous quarter.",
+    options: ["increased", "rose", "grew", "went up"],
+    answer: "B"
+  },
+
+  {
+    level: "B1",
+    question: "If we _____ more office space, we could expand the customer service team.",
+    options: ["have", "would have", "had", "will have"],
+    answer: "C"
+  },
+
+  {
+    level: "B1",
+    question: "By the time the new CEO joined the company, sales _____ for three consecutive years.",
+    options: ["declined", "had declined", "have declined", "were declining"],
+    answer: "B"
+  },
+
+  {
+    level: "B1",
+    question: "Please let me know if you _____ any further information regarding our proposal.",
+    options: ["will require", "are requiring", "require", "required"],
+    answer: "C"
+  },
+
+  {
+    level: "B1",
+    question: "The company has introduced a platform _____ allows customers to manage their accounts remotely.",
+    options: ["where", "who", "whose", "which"],
+    answer: "D"
+  },
+
+  {
+    level: "B1",
+    question: "The figures haven't been confirmed yet, so the final result _____ change.",
+    options: ["must", "can't", "might", "should"],
+    answer: "C"
+  },
+
+  {
+    level: "B1",
+    question: "Management is considering _____ the project deadline by two weeks.",
+    options: ["extending", "to extend", "an extension", "whether to extend"],
+    answer: "A"
+  },
+
+  {
+    level: "B1",
+    question: "_____ demand was lower than expected, the company maintained its market share.",
+    options: ["Despite the fact", "Although", "Because", "Since"],
+    answer: "B"
+  },
+
+  {
+    level: "B1",
+    question: "A detailed cost analysis _____ before the investment was approved.",
+    options: ["had taken place", "had been conducted", "was underway", "had been available"],
+    answer: "B"
+  },
+
+  {
+    level: "B1",
+    question: "The company expects to _____ a profit by the end of the financial year.",
+    options: ["earn", "make", "generate", "report"],
+    answer: "B"
+  },
+
+  {
+    level: "B1",
+    question: "The project is running behind _____ because of delays in the supply chain.",
+    options: ["schedule", "time", "expectations", "its target"],
+    answer: "A"
+  },
+
+
+  /* ===================== B2 ===================== */
+
+  {
+    level: "B2",
+    question: "Had we received your confirmation earlier, we _____ the shipment yesterday.",
+    options: ["would dispatch", "would have dispatched", "had dispatched", "could dispatch"],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "Not only _____ operating costs, but the new strategy also improved productivity.",
+    options: [
+      "the company did reduce",
+      "did the company reduce",
+      "the company reduced",
+      "the company had reduced"
+    ],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "If the company had invested in automation five years ago, it _____ more competitive today.",
+    options: ["would have been", "will be", "would be", "had been"],
+    answer: "C"
+  },
+
+  {
+    level: "B2",
+    question: "The new platform is expected _____ fully operational by the end of the quarter.",
+    options: ["being", "to be", "to becoming", "to remain"],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "We _____ the supplier before changing the order. Now we're facing an additional charge.",
+    options: ["should consult", "should have consulted", "would consult", "must have consulted"],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "_____ significant losses during the previous financial year, the company introduced a restructuring programme.",
+    options: [
+      "Having experienced",
+      "After being experienced",
+      "Because of having to be experienced",
+      "As a result of having been experiencing"
+    ],
+    answer: "A"
+  },
+
+  {
+    level: "B2",
+    question: "It is essential that every department _____ its expenditure before Friday.",
+    options: ["reviews", "will review", "review", "reviewed"],
+    answer: "C"
+  },
+
+  {
+    level: "B2",
+    question: "The company had its customer database _____ by an independent cybersecurity firm.",
+    options: ["under audit", "audited", "being audited", "to be audited"],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "Revenue increased by 12%; _____, operating profit remained virtually unchanged.",
+    options: ["consequently", "furthermore", "therefore", "nevertheless"],
+    answer: "D"
+  },
+
+  {
+    level: "B2",
+    question: "Should you _____ any questions regarding the proposal, please do not hesitate to contact me.",
+    options: ["have", "encounter", "wish to raise", "need clarification on"],
+    answer: "A"
+  },
+
+  {
+    level: "B2",
+    question: "By the end of Q4, the development team _____ all three phases of the project.",
+    options: ["will complete", "will have completed", "has completed", "would complete"],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "_____ the initial technical difficulties, the implementation was completed on schedule.",
+    options: ["Although there were", "Regardless of", "Despite", "Given"],
+    answer: "C"
+  },
+
+  {
+    level: "B2",
+    question: "The consultant recommended that the company _____ its current pricing strategy.",
+    options: ["revises", "revise", "revised", "will revise"],
+    answer: "B"
+  },
+
+  {
+    level: "B2",
+    question: "The company intends to _____ into several emerging markets over the next three years.",
+    options: ["expand", "move", "develop", "enter"],
+    answer: "A"
+  },
+
+  {
+    level: "B2",
+    question: "Management introduced several measures to _____ unnecessary expenditure.",
+    options: ["lower", "cut", "reduce", "control"],
+    answer: "B"
+  },
+
+
+  /* ===================== C1 ===================== */
+
+  {
+    level: "C1",
+    question: "Rarely _____ such a substantial improvement in operating margins within a single financial year.",
+    options: [
+      "the company has achieved",
+      "has the company achieved",
+      "the company had achieved",
+      "did the company achieve"
+    ],
+    answer: "B"
+  },
+
+  {
+    level: "C1",
+    question: "_____ the merger failed, both companies would have faced considerable financial pressure.",
+    options: ["If", "Were", "Had", "Should"],
+    answer: "C"
+  },
+
+  {
+    level: "C1",
+    question: "We would appreciate _____ informed of any developments that might affect the agreed delivery schedule.",
+    options: ["to be kept", "being kept", "having been kept", "keeping"],
+    answer: "B"
+  },
+
+  {
+    level: "C1",
+    question: "_____ all viable alternatives, the board concluded that restructuring was unavoidable.",
+    options: ["Having considered", "After considering", "Once it had considered", "In considering"],
+    answer: "A"
+  },
+
+  {
+    level: "C1",
+    question: "The competitor launched six months ahead of schedule. They _____ development much earlier than we assumed.",
+    options: ["may have begun", "should have begun", "must have begun", "would have begun"],
+    answer: "C"
+  },
+
+  {
+    level: "C1",
+    question: "What the project team needs most _____ a clearly defined set of priorities.",
+    options: ["are", "is", "has been", "remains"],
+    answer: "B"
+  },
+
+  {
+    level: "C1",
+    question: "Were market conditions _____ further, the company might need to revise its full-year forecast.",
+    options: ["deteriorating", "deteriorated", "to deteriorate", "likely to deteriorate"],
+    answer: "C"
+  },
+
+  {
+    level: "C1",
+    question: "Implementation involved substantial initial costs. _____, the long-term efficiency gains are expected to outweigh the investment.",
+    options: ["Consequently", "Likewise", "Nonetheless", "Hence"],
+    answer: "C"
+  },
+
+  {
+    level: "C1",
+    question: "The board decided to _____ the acquisition after the due-diligence process revealed several significant liabilities.",
+    options: ["withdraw from", "proceed with", "reconsider", "postpone"],
+    answer: "A"
+  },
+
+  {
+    level: "C1",
+    question: "The restructuring programme is intended to _____ operations by eliminating unnecessary layers of management.",
+    options: ["consolidate", "streamline", "restructure", "decentralize"],
+    answer: "B"
+  }
+
+];
+
+
+/* =========================================================
+   ASSESSMENT SYSTEM
+   ========================================================= */
+
+const accessGate = document.getElementById("accessGate");
+const accessCodeInput = document.getElementById("accessCode");
+const verifyAccessBtn = document.getElementById("verifyAccessBtn");
+const accessMessage = document.getElementById("accessMessage");
+
+const candidateForm = document.getElementById("candidateForm");
+const testArea = document.getElementById("testArea");
+
+const candidateNameInput = document.getElementById("candidateName");
+const candidateCompanyInput = document.getElementById("candidateCompany");
+const candidateEmailInput = document.getElementById("candidateEmail");
+
+
+/*
+  Separate storage keys are used for Business English.
+  This prevents General English progress from mixing with
+  Business English progress.
+*/
+
+const ACCESS_KEY = "linguaMetricsBusinessCoreVerifiedAccess";
+const CANDIDATE_KEY = "linguaMetricsBusinessCoreCandidate";
+const STARTED_KEY = "linguaMetricsBusinessCoreStarted";
+const TIMER_KEY = "linguaMetricsBusinessCoreStartTime";
+const PROGRESS_KEY = "linguaMetricsBusinessCoreProgress";
+
+const ASSESSMENT_DURATION = 45 * 60;
+
+
+let verifiedAccess = null;
+
+let candidate = {
+  name: "",
+  email: "",
+  company: ""
+};
+
+let currentQuestion = 0;
+let userAnswers = [];
+let timerInterval = null;
+let finished = false;
+let progressButton = null;
+
+
+function saveAll() {
+
+  localStorage.setItem(
+    CANDIDATE_KEY,
+    JSON.stringify(candidate)
+  );
+
+  localStorage.setItem(
+    PROGRESS_KEY,
+    JSON.stringify({
+      currentQuestion: currentQuestion,
+      userAnswers: userAnswers
+    })
+  );
+}
+
+
+function loadAll() {
+
+  try {
+
+    const c = JSON.parse(
+      localStorage.getItem(CANDIDATE_KEY) || "null"
+    );
+
+    if (c) {
+      candidate = {
+        name: c.name || "",
+        email: c.email || "",
+        company: c.company || ""
+      };
+    }
+
+    const p = JSON.parse(
+      localStorage.getItem(PROGRESS_KEY) || "null"
+    );
+
+    if (p) {
+
+      currentQuestion =
+        Number.isInteger(p.currentQuestion)
+          ? p.currentQuestion
+          : 0;
+
+      userAnswers =
+        Array.isArray(p.userAnswers)
+          ? p.userAnswers
+          : [];
+    }
+
+  } catch (e) {
+
+    console.error("Restore error:", e);
+
+  }
+}
+
+
+function fillCandidate() {
+
+  candidateNameInput.value = candidate.name;
+  candidateCompanyInput.value = candidate.company;
+  candidateEmailInput.value = candidate.email;
+
+  candidateNameInput.readOnly = true;
+  candidateCompanyInput.readOnly = true;
+  candidateEmailInput.readOnly = true;
+}
+
+
+function showTest() {
+
+  accessGate.style.display = "none";
+  candidateForm.style.display = "none";
+  testArea.style.display = "block";
+
+  document.getElementById("candidateInfo").textContent =
+    candidate.name +
+    (candidate.company ? " — " + candidate.company : "");
+}
+
+
+/* =========================================================
+   ACCESS CODE
+   ========================================================= */
+
+verifyAccessBtn.addEventListener("click", async function () {
+
+  const accessCode = accessCodeInput.value.trim();
+
+  if (!accessCode) {
+
+    accessMessage.textContent =
+      "Please enter your access code.";
+
+    return;
+  }
+
+  verifyAccessBtn.disabled = true;
+  verifyAccessBtn.textContent = "Verifying...";
+
+  try {
+
+    const response = await fetch("/api/verify-access", {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        accessCode: accessCode
+      })
+    });
+
+
+    const data = await response.json();
+
+
+    if (!data.success) {
+
+      accessMessage.textContent = data.message;
+
+      verifyAccessBtn.disabled = false;
+      verifyAccessBtn.textContent = "Verify & Continue";
+
+      return;
+    }
+
+
+    verifiedAccess = data.access;
+
+
+    /*
+      A new verified access code starts a new
+      Business English Core session.
+    */
+
+    localStorage.removeItem(STARTED_KEY);
+    localStorage.removeItem(TIMER_KEY);
+    localStorage.removeItem(PROGRESS_KEY);
+    localStorage.removeItem(CANDIDATE_KEY);
+
+    currentQuestion = 0;
+    userAnswers = [];
+    finished = false;
+
+
+    sessionStorage.setItem(
+      ACCESS_KEY,
+      JSON.stringify(verifiedAccess)
+    );
+
+
+    candidate = {
+
+      name:
+        verifiedAccess.candidateName || "",
+
+      email:
+        verifiedAccess.candidateEmail || "",
+
+      company:
+        verifiedAccess.organizationName || ""
+    };
+
+
+    saveAll();
+    fillCandidate();
+
+
+    accessGate.style.display = "none";
+    candidateForm.style.display = "block";
+
+    accessMessage.textContent = "";
+
+
+  } catch (error) {
+
+    console.error("ACCESS ERROR:", error);
+
+    accessMessage.textContent =
+      "An error occurred. Please try again.";
+
+    verifyAccessBtn.disabled = false;
+    verifyAccessBtn.textContent =
+      "Verify & Continue";
+  }
+});
+
+
+/* =========================================================
+   START TEST
+   ========================================================= */
+
+document
+  .getElementById("startTest")
+  .addEventListener("click", function () {
+
+    candidate.name =
+      candidateNameInput.value.trim();
+
+    candidate.email =
+      candidateEmailInput.value.trim();
+
+    candidate.company =
+      candidateCompanyInput.value.trim();
+
+
+    if (!candidate.name || !candidate.email) {
+
+      alert(
+        "Please enter your full name and email address."
+      );
+
+      return;
+    }
+
+
+    localStorage.setItem(
+      STARTED_KEY,
+      "true"
+    );
+
+
+    /*
+      Timer starts only when the candidate
+      actually starts the assessment.
+    */
+
+    if (!localStorage.getItem(TIMER_KEY)) {
+
+      localStorage.setItem(
+        TIMER_KEY,
+        Date.now().toString()
+      );
+    }
+
+
+    loadAll();
+    saveAll();
+
+    showTest();
+    startTimer();
+    showQuestion();
+  });
+
+
+/* =========================================================
+   TIMER
+   ========================================================= */
+
+function startTimer() {
+
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+
+  updateTimer();
+
+  timerInterval =
+    setInterval(updateTimer, 1000);
+
+  document.addEventListener(
+    "visibilitychange",
+    updateTimer
+  );
+
+  window.addEventListener(
+    "pageshow",
+    updateTimer
+  );
+
+  window.addEventListener(
+    "focus",
+    updateTimer
+  );
+}
+
+
+function updateTimer() {
+
+  const start =
+    parseInt(
+      localStorage.getItem(TIMER_KEY),
+      10
+    );
+
+  if (!Number.isFinite(start)) return;
+
+
+  const elapsed =
+    Math.floor(
+      (Date.now() - start) / 1000
+    );
+
+
+  const timeLeft =
+    Math.max(
+      0,
+      ASSESSMENT_DURATION - elapsed
+    );
+
+
+  const timer =
+    document.getElementById("timer");
+
+
+  if (timer) {
+
+    timer.textContent =
+      "Time Remaining: " +
+      Math.floor(timeLeft / 60) +
+      ":" +
+      String(timeLeft % 60).padStart(2, "0");
+  }
+
+
+  if (timeLeft <= 0) {
+
+    clearInterval(timerInterval);
+    timerInterval = null;
+
+    alert(
+      "Time is up. Your assessment has ended."
+    );
+
+    finishAssessment(true);
+  }
+}
+
+
+/* =========================================================
+   PROGRESS SCREEN
+   ========================================================= */
+
+function showProgress() {
+
+  const container =
+    document.getElementById(
+      "questionsContainer"
+    );
+
+
+  const answered =
+    userAnswers.filter(
+      a => a !== undefined
+    ).length;
+
+
+  container.innerHTML = "";
+
+
+  const box =
+    document.createElement("div");
+
+
+  box.style.cssText =
+    "background:#fff;" +
+    "padding:25px;" +
+    "border-radius:16px;" +
+    "border:1px solid #d7e5eb";
+
+
+  const title =
+    document.createElement("h2");
+
+
+  title.textContent =
+    "Assessment Progress";
+
+
+  title.style.color =
+    "#082c5c";
+
+
+  box.appendChild(title);
+
+
+  const summary =
+    document.createElement("p");
+
+
+  summary.innerHTML =
+    "🟢 <strong>Answered:</strong> " +
+    answered +
+    " &nbsp;&nbsp;&nbsp; " +
+    "⚪ <strong>Blank:</strong> " +
+    (questions.length - answered);
+
+
+  box.appendChild(summary);
+
+
+  const grid =
+    document.createElement("div");
+
+
+  grid.style.cssText =
+    "display:grid;" +
+    "grid-template-columns:repeat(10,1fr);" +
+    "gap:8px;" +
+    "margin-top:20px";
+
+
+  questions.forEach(
+    function (_, index) {
+
+      const b =
+        document.createElement("button");
+
+
+      b.type = "button";
+
+      b.textContent =
+        index + 1;
+
+
+      b.style.cssText =
+        "padding:10px;" +
+        "border-radius:8px;" +
+        "border:1px solid #d7e5eb;" +
+        "cursor:pointer;" +
+        "font-weight:700;" +
+
+        (
+          userAnswers[index] !== undefined
+
+            ? "background:#dff3e4;color:#247a3d"
+
+            : "background:#eee;color:#666"
+        );
+
+
+      b.addEventListener(
+        "click",
+        function () {
+
+          currentQuestion = index;
+
+          saveAll();
+
+          showQuestion();
+        }
+      );
+
+
+      grid.appendChild(b);
+    }
+  );
+
+
+  box.appendChild(grid);
+  container.appendChild(box);
+}
+
+
+/* =========================================================
+   FINISH ASSESSMENT
+   ========================================================= */
+
+function finishAssessment(forceFinish) {
+
+  if (finished) return;
+
+
+  if (!forceFinish) {
+
+    const selected =
+      document.querySelector(
+        'input[name="currentQuestion"]:checked'
+      );
+
+
+    if (selected) {
+
+      userAnswers[currentQuestion] =
+        selected.value;
+
+      saveAll();
+    }
+
+
+    const attempted =
+      userAnswers.filter(
+        a => a !== undefined
+      ).length;
+
+
+    if (!confirm(
+
+      "Are you sure you want to finish the assessment?\n\n" +
+
+      "Answered questions: " +
+      attempted +
+      " / " +
+      questions.length
+
+    )) return;
+  }
+
+
+  finished = true;
+
+
+  const score =
+    userAnswers.reduce(
+      function (total, answer, index) {
+
+        return total +
+          (
+            answer === questions[index].answer
+              ? 1
+              : 0
+          );
+      },
+      0
+    );
+
+
+  /*
+    TEMPORARY CORE LEVEL CALCULATION
+
+    This keeps the website functional while
+    the final Business English weighted/gated
+    CEFR algorithm is being finalized.
+
+    The raw score is saved accurately.
+  */
+
+  let estimatedLevel = "A1";
+
+  if (score >= 51) {
+    estimatedLevel = "C1";
+  }
+
+  else if (score >= 41) {
+    estimatedLevel = "B2";
+  }
+
+  else if (score >= 28) {
+    estimatedLevel = "B1";
+  }
+
+  else if (score >= 15) {
+    estimatedLevel = "A2";
+  }
+
+
+  clearInterval(timerInterval);
+  timerInterval = null;
+
+
+  localStorage.removeItem(TIMER_KEY);
+  localStorage.removeItem(STARTED_KEY);
+  localStorage.removeItem(PROGRESS_KEY);
+  localStorage.removeItem(CANDIDATE_KEY);
+
+  sessionStorage.removeItem(ACCESS_KEY);
+
+
+  fetch("/api/save-result", {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+
+      candidateName:
+        candidate.name,
+
+      email:
+        candidate.email,
+
+      organizationName:
+        candidate.company,
+
+      testName:
+        "Business English Core Assessment",
+
+      candidateType:
+        candidate.company
+          ? "corporate"
+          : "individual",
+
+      level:
+        estimatedLevel,
+
+      score:
+        score,
+
+      totalQuestions:
+        questions.length,
+
+      answers:
+        userAnswers,
+
+      correctAnswers:
+        questions.map(
+          q => q.answer
+        ),
+
+      duration:
+        "45 minutes",
+
+      completedAt:
+        new Date().toISOString()
+    })
+  })
+
+
+  .then(
+    r => r.json()
+  )
+
+
+  .then(function (data) {
+
+    console.log(
+      "Result saved:",
+      data
+    );
+
+
+    document
+      .getElementById("timer")
+      .style.display =
+        "none";
+
+
+    const testInfo =
+      document
+        .getElementById("testArea")
+        .querySelector(".test-info");
+
+
+    if (testInfo) {
+
+      testInfo.style.display =
+        "none";
+    }
+
+
+    if (progressButton) {
+
+      progressButton.style.display =
+        "none";
+    }
+
+
+    document
+      .getElementById(
+        "questionsContainer"
+      )
+      .innerHTML = `
+
+        <div style="
+          background:#fff;
+          border:1px solid #d7e5eb;
+          border-radius:16px;
+          padding:40px;
+          text-align:center
+        ">
+
+          <h2 style="color:#082c5c">
+            Assessment Completed
+          </h2>
+
+          <p style="
+            font-size:18px;
+            margin-top:20px
+          ">
+            Thank you for completing
+            the assessment.
+          </p>
+
+          <p style="margin-top:10px">
+            Your assessment has been
+            successfully submitted.
+          </p>
+
+        </div>
+      `;
+  })
+
+
+  .catch(function (error) {
+
+    console.error(
+      "Result save error:",
+      error
+    );
+
+
+    alert(
+      "There was an error submitting the assessment. " +
+      "Please contact Lingua-Metrics."
+    );
+  });
+}
+
+
+/* =========================================================
+   SHOW QUESTION
+   ========================================================= */
+
+function showQuestion() {
+
+  const container =
+    document.getElementById(
+      "questionsContainer"
+    );
+
+
+  container.innerHTML = "";
+
+
+  if (!progressButton) {
+
+    progressButton =
+      document.createElement("button");
+
+
+    progressButton.type =
+      "button";
+
+
+    progressButton.className =
+      "start-btn";
+
+
+    progressButton.textContent =
+      "View Progress";
+
+
+    progressButton.addEventListener(
+      "click",
+      showProgress
+    );
+
+
+    testArea.insertBefore(
+      progressButton,
+      container
+    );
+  }
+
+
+  const item =
+    questions[currentQuestion];
+
+
+  const box =
+    document.createElement("div");
+
+
+  box.style.cssText =
+    "background:#fff;" +
+    "border:1px solid #d7e5eb;" +
+    "border-radius:12px;" +
+    "padding:25px;" +
+    "margin-bottom:20px";
+
+
+  const title =
+    document.createElement("h3");
+
+
+  title.textContent =
+    "Question " +
+    (currentQuestion + 1) +
+    " / " +
+    questions.length;
+
+
+  title.style.color =
+    "#082c5c";
+
+
+  box.appendChild(title);
+
+
+  const q =
+    document.createElement("p");
+
+
+  q.textContent =
+    item.question;
+
+
+  q.style.cssText =
+    "font-weight:700;" +
+    "font-size:17px";
+
+
+  box.appendChild(q);
+
+
+  item.options.forEach(
+    function (option, optionIndex) {
+
+      const label =
+        document.createElement("label");
+
+
+      label.style.cssText =
+        "display:block;" +
+        "padding:10px;" +
+        "cursor:pointer";
+
+
+      const radio =
+        document.createElement("input");
+
+
+      radio.type =
+        "radio";
+
+
+      radio.name =
+        "currentQuestion";
+
+
+      radio.value =
+        String.fromCharCode(
+          65 + optionIndex
+        );
+
+
+      radio.addEventListener(
+        "change",
+        function () {
+
+          userAnswers[currentQuestion] =
+            radio.value;
+
+          saveAll();
+        }
+      );
+
+
+      if (
+        userAnswers[currentQuestion] ===
+        radio.value
+      ) {
+
+        radio.checked = true;
+      }
+
+
+      label.appendChild(radio);
+
+
+      label.appendChild(
+
+        document.createTextNode(
+
+          " " +
+
+          String.fromCharCode(
+            65 + optionIndex
+          ) +
+
+          ") " +
+
+          option
+        )
+      );
+
+
+      box.appendChild(label);
+    }
+  );
+
+
+  const buttons =
+    document.createElement("div");
+
+
+  buttons.style.cssText =
+    "display:flex;" +
+    "flex-direction:column;" +
+    "gap:12px;" +
+    "margin-top:20px";
+
+
+  const row =
+    document.createElement("div");
+
+
+  row.style.cssText =
+    "display:flex;" +
+    "gap:12px;" +
+    "width:100%";
+
+
+  const prev =
+    document.createElement("button");
+
+
+  prev.type =
+    "button";
+
+
+  prev.className =
+    "start-btn";
+
+
+  prev.textContent =
+    "← Previous Question";
+
+
+  prev.style.cssText =
+    "width:50%;" +
+    "margin-top:0";
+
+
+  prev.disabled =
+    currentQuestion === 0;
+
+
+  prev.addEventListener(
+    "click",
+    function () {
+
+      if (currentQuestion > 0) {
+
+        currentQuestion--;
+
+        saveAll();
+        showQuestion();
+
+        container.scrollIntoView({
+          block: "start",
+          behavior: "auto"
+        });
+      }
+    }
+  );
+
+
+  const next =
+    document.createElement("button");
+
+
+  next.type =
+    "button";
+
+
+  next.className =
+    "start-btn";
+
+
+  next.textContent =
+    "Next Question →";
+
+
+  next.style.cssText =
+    "width:50%;" +
+    "margin-top:0";
+
+
+  next.disabled =
+    currentQuestion ===
+    questions.length - 1;
+
+
+  next.addEventListener(
+    "click",
+    function () {
+
+      const selected =
+        document.querySelector(
+          'input[name="currentQuestion"]:checked'
+        );
+
+
+      if (selected) {
+
+        userAnswers[currentQuestion] =
+          selected.value;
+      }
+
+
+      if (
+        currentQuestion <
+        questions.length - 1
+      ) {
+
+        currentQuestion++;
+
+        saveAll();
+        showQuestion();
+
+        container.scrollIntoView({
+          block: "start",
+          behavior: "auto"
+        });
+      }
+    }
+  );
+
+
+  row.appendChild(prev);
+  row.appendChild(next);
+
+
+  const finish =
+    document.createElement("button");
+
+
+  finish.type =
+    "button";
+
+
+  finish.className =
+    "start-btn";
+
+
+  finish.textContent =
+    "✓ Finish Assessment";
+
+
+  finish.style.cssText =
+    "width:100%;" +
+    "margin-top:0";
+
+
+  finish.addEventListener(
+    "click",
+    function () {
+
+      finishAssessment(false);
+    }
+  );
+
+
+  buttons.appendChild(row);
+  buttons.appendChild(finish);
+
+  box.appendChild(buttons);
+  container.appendChild(box);
+}
+
+
+/* =========================================================
+   RESTORE AFTER REFRESH
+   ========================================================= */
+
+(function restoreSession() {
+
+  loadAll();
+
+
+  try {
+
+    verifiedAccess =
+      JSON.parse(
+        sessionStorage.getItem(
+          ACCESS_KEY
+        ) || "null"
+      );
+
+  } catch (e) {
+
+    verifiedAccess = null;
+  }
+
+
+  if (!verifiedAccess) {
+
+    accessGate.style.display =
+      "block";
+
+    candidateForm.style.display =
+      "none";
+
+    testArea.style.display =
+      "none";
+
+    return;
+  }
+
+
+  fillCandidate();
+
+
+  if (
+
+    localStorage.getItem(
+      STARTED_KEY
+    ) === "true"
+
+    &&
+
+    localStorage.getItem(
+      TIMER_KEY
+    )
+
+  ) {
+
+    showTest();
+    startTimer();
+    showQuestion();
+
+  } else {
+
+    accessGate.style.display =
+      "none";
+
+    candidateForm.style.display =
+      "block";
+
+    testArea.style.display =
+      "none";
+  }
+
+})();
+
+</script>
+
+</body>
+</html>
