@@ -71,6 +71,7 @@ export default async function handler(req, res) {
       candidateName,
       candidateEmail,
       expiresAt,
+      assessmentType,
     } = req.body;
 
     // Tablo yoksa oluştur
@@ -85,8 +86,16 @@ export default async function handler(req, res) {
         is_used BOOLEAN DEFAULT FALSE,
         expires_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        used_at TIMESTAMP
+        used_at TIMESTAMP,
+        assessment_type TEXT DEFAULT 'general-english'
       );
+    `);
+
+    // Mevcut tabloda assessment_type sütunu yoksa ekle
+    await pool.query(`
+      ALTER TABLE assessment_access_codes
+      ADD COLUMN IF NOT EXISTS assessment_type TEXT
+      DEFAULT 'general-english';
     `);
 
     // Yeni benzersiz kod oluştur
@@ -119,7 +128,8 @@ export default async function handler(req, res) {
         organization_name,
         candidate_name,
         candidate_email,
-        expires_at
+        expires_at,
+        assessment_type
       )
       VALUES (
         $1,
@@ -127,7 +137,8 @@ export default async function handler(req, res) {
         $3,
         $4,
         $5,
-        $6
+        $6,
+        $7
       )
       RETURNING
         id,
@@ -138,7 +149,8 @@ export default async function handler(req, res) {
         candidate_email,
         is_used,
         expires_at,
-        created_at;
+        created_at,
+        assessment_type;
       `,
       [
         accessCode,
@@ -147,6 +159,7 @@ export default async function handler(req, res) {
         candidateName || null,
         candidateEmail || null,
         expiresAt || null,
+        assessmentType || "general-english",
       ]
     );
 
