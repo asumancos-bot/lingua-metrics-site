@@ -41,19 +41,25 @@ export default async function handler(req, res) {
         is_used BOOLEAN DEFAULT FALSE,
         expires_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        used_at TIMESTAMP
+        used_at TIMESTAMP,
+        assessment_type TEXT DEFAULT 'general-english'
       );
+    `);
+
+    /*
+     * Add assessment_type to older existing tables if necessary.
+     */
+    await pool.query(`
+      ALTER TABLE assessment_access_codes
+      ADD COLUMN IF NOT EXISTS assessment_type TEXT
+      DEFAULT 'general-english';
     `);
 
     /*
      * Atomically claim the access code.
      *
-     * IMPORTANT:
-     * The code becomes USED at the moment access is successfully granted.
-     *
-     * Because this is a single UPDATE statement with
-     * "is_used = FALSE", two users cannot successfully claim
-     * the same code at the same time.
+     * The code becomes USED at the moment access is
+     * successfully granted.
      */
     const claimResult = await pool.query(
       `
@@ -77,15 +83,14 @@ export default async function handler(req, res) {
         candidate_email,
         is_used,
         expires_at,
-        used_at;
+        used_at,
+        assessment_type;
       `,
       [normalizedCode]
     );
 
     /*
      * SUCCESS
-     *
-     * The code has just been claimed successfully.
      */
     if (claimResult.rows.length > 0) {
       const access = claimResult.rows[0];
@@ -99,6 +104,8 @@ export default async function handler(req, res) {
           organizationName: access.organization_name,
           candidateName: access.candidate_name,
           candidateEmail: access.candidate_email,
+          assessmentType:
+            access.assessment_type || "general-english",
         },
       });
     }
@@ -112,7 +119,8 @@ export default async function handler(req, res) {
       SELECT
         id,
         is_used,
-        expires_at
+        expires_at,
+        assessment_type
       FROM assessment_access_codes
       WHERE access_code = $1
       LIMIT 1;
