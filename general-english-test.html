@@ -764,7 +764,7 @@ const ACCESS_KEY = "linguaMetricsVerifiedAccess";
 const CANDIDATE_KEY = "linguaMetricsCandidate";
 const STARTED_KEY = "linguaMetricsAssessmentStarted";
 const TIMER_KEY = "linguaMetricsAssessmentStartTime";
-const PROGRESS_KEY = "linguaMetricsAssessmentProgress";
+const PROGRESS_KEY = "linguaMetricsAssessmentProgressV2";
 const ASSESSMENT_DURATION = 60 * 60;
 
 let verifiedAccess = null;
@@ -940,7 +940,7 @@ function updateTimer() {
 
 function showProgress() {
   const container = document.getElementById("questionsContainer");
-  const answered = userAnswers.filter(a => a !== undefined).length;
+  const answered = userAnswers.filter(a => a != null).length;
 
   container.innerHTML = "";
 
@@ -970,7 +970,7 @@ function showProgress() {
     b.textContent = index + 1;
     b.style.cssText =
       "padding:10px;border-radius:8px;border:1px solid #d7e5eb;cursor:pointer;font-weight:700;" +
-      (userAnswers[index] !== undefined
+      (userAnswers[index] != null
         ? "background:#dff3e4;color:#247a3d"
         : "background:#eee;color:#666");
 
@@ -999,7 +999,7 @@ function finishAssessment(forceFinish) {
       saveAll();
     }
 
-    const attempted = userAnswers.filter(a => a !== undefined).length;
+    const attempted = userAnswers.filter(a => a != null).length;
 
     if (!confirm(
       "Are you sure you want to finish the assessment?\n\n" +
@@ -1142,8 +1142,18 @@ function showQuestion() {
     radio.name = "currentQuestion";
     radio.value = String.fromCharCode(65 + optionIndex);
 
-    radio.addEventListener("change", function() {
-      userAnswers[currentQuestion] = radio.value;
+    radio.addEventListener("click", function() {
+
+      const sameAnswerWasAlreadySelected =
+        userAnswers[currentQuestion] === radio.value;
+
+      if (sameAnswerWasAlreadySelected) {
+        radio.checked = false;
+        userAnswers[currentQuestion] = null;
+      } else {
+        userAnswers[currentQuestion] = radio.value;
+      }
+
       saveAll();
     });
 
