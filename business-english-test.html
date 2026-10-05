@@ -1040,7 +1040,7 @@ function showProgress() {
 
   const answered =
     userAnswers.filter(
-      a => a !== undefined
+      a => a != null
     ).length;
 
 
@@ -1120,7 +1120,7 @@ function showProgress() {
         "font-weight:700;" +
 
         (
-          userAnswers[index] !== undefined
+          userAnswers[index] != null
 
             ? "background:#dff3e4;color:#247a3d"
 
@@ -1179,7 +1179,7 @@ function finishAssessment(forceFinish) {
 
     const attempted =
       userAnswers.filter(
-        a => a !== undefined
+        a => a != null
       ).length;
 
 
@@ -1533,16 +1533,22 @@ function showQuestion() {
         );
 
 
-      radio.addEventListener(
-        "change",
-        function () {
+     let wasChecked = false;
 
-          userAnswers[currentQuestion] =
-            radio.value;
+radio.addEventListener("mousedown", function () {
+  wasChecked = radio.checked;
+});
 
-          saveAll();
-        }
-      );
+radio.addEventListener("click", function () {
+  if (wasChecked) {
+    radio.checked = false;
+    userAnswers[currentQuestion] = null;
+  } else {
+    userAnswers[currentQuestion] = radio.value;
+  }
+
+  saveAll();
+});
 
 
       if (
